@@ -1,0 +1,1971 @@
+---
+format:
+  revealjs:
+    css: style.css
+    theme: simple
+    slide-number: true
+    code-line-numbers: false
+    preview-links: auto
+    keyboard: true
+    touch: true
+    help: true
+    include-in-header: meta-tags.html
+    link-external-newwindow: true
+execute:
+  echo: true
+  eval: false
+keywords: ["data-validation", "pydantic", "zod", "python", "typescript", "software-engineering", "type-safety"]
+description-meta: "Explore the benefits of data validation libraries like Pydantic and Zod. Learn how they improve readability, type safety, testing, security, and maintainability in your applications."
+license: "CC0 1.0 Universal"
+pagetitle: "Parse, Don't Pray: The Case for Data Validation"
+author-meta: "Indrajeet Patil"
+date-meta: "`r Sys.time()`"
+lang: "en"
+dir: "ltr"
+image: "media/social-media-card.jpg"
+image-alt: "Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"
+canonical-url: "https://indrajeetpatil.github.io/parse-dont-pray/"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+## Parse, Don't Pray {style="margin-top: 1em; margin-bottom: 2.5em;"}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {style="margin-top: 2em; padding: 1.5em 0;"}
+
+::: {style="font-size: 0.9em; font-weight: bold;"}
+The Case for Data Validation
+:::
+
+::: {style="font-size: 0.8em; margin-top: 1em;"}
+Indrajeet Patil
+:::
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {style="margin-top: 2em;"}
+
+![](media/social-media-card.jpg){width="100%" fig-alt="Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"}
+
+:::
+
+:::
+
+::::
+
+::: {.footer style="text-align: center; font-size: 0.55em; color: #999; position: absolute; bottom: 20px; left: 0; right: 0;"}
+Source code: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/IndrajeetPatil/parse-dont-pray/)
+:::
+
+## What You'll Learn {.smaller}
+
+- Why data validation libraries are essential for robust applications
+- How Pydantic (Python) and Zod (TypeScript) improve code quality
+- Benefits across readability, runtime behavior, typing, testing, and security
+
+<br>
+
+::: {style="background-color: #FFFBC1; padding: 20px; border-radius: 25px; text-align: center;"}
+
+🎯 **Goal**
+
+Create a **validated type system** that works at runtime, ensuring data actually matches your assumptions.
+
+:::
+
+<br>
+
+::: {style="background-color: #e3f2fd; padding: 20px; border-radius: 25px; text-align: center;"}
+
+Examples assume a **Python-TypeScript** full-stack, but the outlined principles are relevant in other stacks as well.
+
+:::
+
+## What is Data Validation? {.smaller}
+
+Data validation is the process of ensuring that data meets specific criteria before it's used in your application.
+
+. . .
+
+::: {style="background-color: #fff3e0; padding: 20px; border-radius: 10px; margin: 20px 0;"}
+
+**Without validation libraries**, you write manual checks scattered throughout your code:
+
+- Type checking (`isinstance`, `typeof`)
+- Range validation (`age >= 18`)
+- Format validation (email regex, URL patterns)
+- Custom business rules
+
+**With validation libraries**, you define schemas that automatically validate, parse, and type your data.
+
+:::
+
+## Meet the Libraries {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {style="background-color: #ffffff; border: 2px solid #E92063; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85em;"}
+
+::: {style="text-align: center; margin-bottom: 15px;"}
+![](media/pydantic-logo.png){width="100px" fig-alt="Pydantic logo"}
+:::
+
+::: {style="font-size: 1.05em; font-weight: bold; margin-bottom: 10px;"}
+**Pydantic** (Python)
+:::
+
+- Runtime data validation using Python type hints
+- Automatic type coercion and parsing
+- Integration with FastAPI, SQLModel, and more
+- JSON Schema generation
+- V2 offers 5-50x performance improvements
+
+::: {style="text-align: center; margin-top: 10px; font-size: 0.95em;"}
+[docs.pydantic.dev](https://docs.pydantic.dev/latest/)
+:::
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {style="background-color: #ffffff; border: 2px solid #3E67B1; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85em;"}
+
+::: {style="text-align: center; margin-bottom: 15px;"}
+![](media/zod-logo.webp){width="100px" fig-alt="Zod logo"}
+:::
+
+::: {style="font-size: 1.05em; font-weight: bold; margin-bottom: 10px;"}
+**Zod** (TypeScript)
+:::
+
+- TypeScript-first schema validation
+- Zero dependencies, works in all JS environments
+- Type inference from schemas
+- Composable schema design
+- Async validation support
+
+::: {style="text-align: center; margin-top: 10px; font-size: 0.95em;"}
+[zod.dev](https://zod.dev/)
+:::
+
+:::
+
+:::
+
+::::
+
+# Benefits of Data Validation Libraries
+
+*Creating robust, maintainable applications*
+
+# Readability
+
+*Self-documenting schemas that reduce cognitive load*
+
+## Self-Documenting Schemas {.smaller}
+
+Validation rules serve as inline documentation, making it immediately clear what data structure is expected.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, EmailStr, Field
+from typing import Literal
+
+class UserProfile(BaseModel):
+    """User profile with built-in validation."""
+    username: str = Field(min_length=3, max_length=20)
+    email: EmailStr
+    age: int = Field(ge=18, le=120)
+    role: Literal["admin", "user", "guest"]
+    is_active: bool = True
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const UserProfileSchema = z.object({
+  username: z.string().min(3).max(20),
+  email: z.string().email(),
+  age: z.number().int().min(18).max(120),
+  role: z.enum(["admin", "user", "guest"]),
+  isActive: z.boolean().default(true),
+});
+
+type UserProfile = z.infer<typeof UserProfileSchema>;
+```
+
+:::
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+The schema **is** the documentation—no separate docs needed!
+:::
+
+## Single Source of Truth {.smaller}
+
+Schema definition, validation logic, and type information all live in one place instead of being scattered across the codebase.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, validator
+from datetime import datetime
+
+class Order(BaseModel):
+    """Single source for order structure, validation, and types."""
+    order_id: str
+    customer_id: str
+    total_amount: float = Field(gt=0)
+    created_at: datetime
+    items: list[str] = Field(min_length=1)
+
+    @validator('order_id')
+    def validate_order_id(cls, v):
+        if not v.startswith('ORD-'):
+            raise ValueError('Order ID must start with ORD-')
+        return v
+
+# Type hints, validation, and structure all in one place
+order = Order(
+    order_id="ORD-123",
+    customer_id="CUST-456",
+    total_amount=99.99,
+    created_at=datetime.now(),
+    items=["item1", "item2"]
+)
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const OrderSchema = z.object({
+  orderId: z.string().startsWith("ORD-"),
+  customerId: z.string(),
+  totalAmount: z.number().positive(),
+  createdAt: z.date(),
+  items: z.array(z.string()).min(1),
+}).strict();
+
+type Order = z.infer<typeof OrderSchema>;
+
+// Type, validation, and structure all in one place
+const order = OrderSchema.parse({
+  orderId: "ORD-123",
+  customerId: "CUST-456",
+  totalAmount: 99.99,
+  createdAt: new Date(),
+  items: ["item1", "item2"],
+});
+```
+
+:::
+
+## Declarative Syntax {.smaller}
+
+Describes *what* the data should look like rather than *how* to validate it, reducing cognitive load.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Without Pydantic**
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+
+```{python}
+# Imperative: Lots of manual checks
+def validate_user(data):
+    if not isinstance(data.get('username'), str):
+        raise ValueError('Username must be string')
+    if len(data['username']) < 3 or len(data['username']) > 20:
+        raise ValueError('Username must be 3-20 chars')
+    if not isinstance(data.get('age'), int):
+        raise ValueError('Age must be integer')
+    if data['age'] < 18 or data['age'] > 120:
+        raise ValueError('Age must be 18-120')
+    if data.get('role') not in ['admin', 'user', 'guest']:
+        raise ValueError('Invalid role')
+    # ... and so on
+```
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+**With Pydantic**
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+
+```{python}
+from pydantic import BaseModel, Field
+from typing import Literal
+
+# Declarative: What the data should look like
+class User(BaseModel):
+    username: str = Field(min_length=3, max_length=20)
+    age: int = Field(ge=18, le=120)
+    role: Literal["admin", "user", "guest"]
+```
+
+:::
+
+:::
+
+::::
+
+### TypeScript
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Without Zod**
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+
+```{typescript}
+// Imperative: Lots of manual checks
+function validateUser(data: any) {
+  if (typeof data.username !== 'string') {
+    throw new Error('Username must be string');
+  }
+  if (data.username.length < 3 || data.username.length > 20) {
+    throw new Error('Username must be 3-20 chars');
+  }
+  if (typeof data.age !== 'number') {
+    throw new Error('Age must be number');
+  }
+  if (data.age < 18 || data.age > 120) {
+    throw new Error('Age must be 18-120');
+  }
+  if (!['admin', 'user', 'guest'].includes(data.role)) {
+    throw new Error('Invalid role');
+  }
+  // ... and so on
+}
+```
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+**With Zod**
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+
+```{typescript}
+import { z } from "zod";
+
+// Declarative: What the data should look like
+const UserSchema = z.object({
+  username: z.string().min(3).max(20),
+  age: z.number().int().min(18).max(120),
+  role: z.enum(["admin", "user", "guest"]),
+});
+
+type User = z.infer<typeof UserSchema>;
+```
+
+:::
+
+:::
+
+::::
+
+:::
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Result**: Reduced cognitive load—focus on business logic, not validation boilerplate!
+:::
+
+# Runtime Behavior
+
+*Catch errors early before they propagate*
+
+## Automatic Validation {.smaller}
+
+Data is validated as it enters your system, catching errors early before they propagate.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, ValidationError, Field
+
+class ProductPrice(BaseModel):
+    product_id: str
+    price: float = Field(gt=0)
+    currency: str = Field(pattern=r'^[A-Z]{3}$')
+
+# Valid data passes through
+valid_product = ProductPrice(
+    product_id="PROD-123",
+    price=29.99,
+    currency="USD"
+)
+
+# Invalid data raises detailed error immediately
+try:
+    invalid_product = ProductPrice(
+        product_id="PROD-123",
+        price=-10,  # Negative price!
+        currency="US"  # Invalid currency format!
+    )
+except ValidationError as e:
+    print(e.json())
+    # Shows exactly what's wrong and where
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const ProductPriceSchema = z.object({
+  productId: z.string(),
+  price: z.number().positive(),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+});
+
+// Valid data passes through
+const validProduct = ProductPriceSchema.parse({
+  productId: "PROD-123",
+  price: 29.99,
+  currency: "USD",
+});
+
+// Invalid data throws detailed error immediately
+try {
+  const invalidProduct = ProductPriceSchema.parse({
+    productId: "PROD-123",
+    price: -10, // Negative price!
+    currency: "US", // Invalid currency format!
+  });
+} catch (error) {
+  console.error(error.errors);
+  // Shows exactly what's wrong and where
+}
+```
+
+:::
+
+## Data Coercion & Parsing {.smaller}
+
+Automatically converts compatible types following sensible rules.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel
+from datetime import datetime
+
+class Event(BaseModel):
+    event_id: int  # Coerces string to int if valid
+    timestamp: datetime  # Parses ISO 8601 strings
+    is_public: bool  # Coerces "true", "1", "yes" to True
+    attendees: list[str]  # Coerces tuple to list
+
+# String inputs are intelligently coerced
+event = Event(
+    event_id="42",  # String "42" → int 42
+    timestamp="2024-01-15T10:30:00",  # String → datetime
+    is_public="yes",  # String "yes" → bool True
+    attendees=("Alice", "Bob")  # Tuple → list
+)
+
+print(event.event_id)  # 42 (int)
+print(event.timestamp)  # datetime object
+print(event.is_public)  # True (bool)
+print(event.attendees)  # ["Alice", "Bob"] (list)
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const EventSchema = z.object({
+  eventId: z.coerce.number(),  // Coerces string to number
+  timestamp: z.coerce.date(),  // Parses ISO strings to Date
+  isPublic: z.boolean(),
+  attendees: z.array(z.string()),
+});
+
+// String inputs are intelligently coerced
+const event = EventSchema.parse({
+  eventId: "42",  // String "42" → number 42
+  timestamp: "2024-01-15T10:30:00",  // String → Date
+  isPublic: true,
+  attendees: ["Alice", "Bob"],
+});
+
+console.log(event.eventId);  // 42 (number)
+console.log(event.timestamp);  // Date object
+console.log(event.isPublic);  // true (boolean)
+console.log(event.attendees);  // ["Alice", "Bob"]
+```
+
+:::
+
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Smart coercion**: Handles common API/JSON data format conversions automatically!
+:::
+
+## Detailed Error Messages {.smaller}
+
+Provides specific, actionable feedback about what's wrong and where.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, ValidationError, EmailStr, Field
+
+class SignupForm(BaseModel):
+    username: str = Field(min_length=3)
+    email: EmailStr
+    age: int = Field(ge=13)
+    password: str = Field(min_length=8)
+
+try:
+    user = SignupForm(
+        username="ab",  # Too short
+        email="not-an-email",  # Invalid format
+        age=10,  # Too young
+        password="short"  # Too short
+    )
+except ValidationError as e:
+    print(e.json(indent=2))
+    # Output:
+    # [
+    #   {
+    #     "loc": ["username"],
+    #     "msg": "ensure this value has at least 3 characters",
+    #     "type": "value_error.any_str.min_length"
+    #   },
+    #   {
+    #     "loc": ["email"],
+    #     "msg": "value is not a valid email address",
+    #     "type": "value_error.email"
+    #   },
+    #   ...
+    # ]
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const SignupFormSchema = z.object({
+  username: z.string().min(3),
+  email: z.string().email(),
+  age: z.number().min(13),
+  password: z.string().min(8),
+});
+
+const result = SignupFormSchema.safeParse({
+  username: "ab",  // Too short
+  email: "not-an-email",  // Invalid format
+  age: 10,  // Too young
+  password: "short"  // Too short
+});
+
+if (!result.success) {
+  console.log(JSON.stringify(result.error.format(), null, 2));
+  // Output:
+  // {
+  //   "username": { "_errors": ["String must contain at least 3 character(s)"] },
+  //   "email": { "_errors": ["Invalid email"] },
+  //   "age": { "_errors": ["Number must be greater than or equal to 13"] },
+  //   "password": { "_errors": ["String must contain at least 8 character(s)"] }
+  // }
+}
+```
+
+:::
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Developer-friendly**: Know exactly what's wrong, where it's wrong, and what's expected!
+:::
+
+# Typing
+
+*Type inference that bridges static and runtime worlds*
+
+## Type Inference {.smaller}
+
+TypeScript/Python types are automatically derived from your schemas—no duplicate type definitions needed.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel
+from typing import Optional
+
+class Address(BaseModel):
+    street: str
+    city: str
+    zipcode: str
+    country: str = "USA"  # Default value
+
+class Person(BaseModel):
+    name: str
+    age: int
+    address: Address
+    phone: Optional[str] = None
+
+# Type checkers (mypy, pyright) understand these types automatically
+def get_person_city(person: Person) -> str:
+    # IDE autocomplete works perfectly
+    return person.address.city
+
+# No need to write separate type annotations
+person = Person(
+    name="Alice",
+    age=30,
+    address=Address(street="123 Main St", city="Boston", zipcode="02101")
+)
+
+# Type checker knows this is str
+city: str = get_person_city(person)
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const AddressSchema = z.object({
+  street: z.string(),
+  city: z.string(),
+  zipcode: z.string(),
+  country: z.string().default("USA"),
+});
+
+const PersonSchema = z.object({
+  name: z.string(),
+  age: z.number(),
+  address: AddressSchema,
+  phone: z.string().optional(),
+});
+
+// Type automatically inferred from schema
+type Person = z.infer<typeof PersonSchema>;
+type Address = z.infer<typeof AddressSchema>;
+
+// TypeScript knows all these types
+function getPersonCity(person: Person): string {
+  // Full autocomplete and type checking
+  return person.address.city;
+}
+
+const person = PersonSchema.parse({
+  name: "Alice",
+  age: 30,
+  address: { street: "123 Main St", city: "Boston", zipcode: "02101" }
+});
+
+const city: string = getPersonCity(person);
+```
+
+:::
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Write once, get types everywhere**: Schema is both validator and type definition!
+:::
+
+## End-to-End Type Safety {.smaller}
+
+Ensures runtime data actually matches your static types, bridging the gap between type systems and reality.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, Field
+from typing import List
+
+class ApiResponse(BaseModel):
+    """API response is validated at runtime."""
+    status: str = Field(pattern=r'^(success|error)$')
+    data: List[dict]
+    message: str
+
+def fetch_data_from_api() -> ApiResponse:
+    """Type checker knows this returns ApiResponse."""
+    # External API call (runtime data!)
+    raw_response = requests.get("https://api.example.com/data").json()
+
+    # Validate that runtime data matches expected structure
+    # If API returns unexpected data, this catches it!
+    return ApiResponse(**raw_response)
+
+# Type safety from API boundary through entire app
+def process_response(response: ApiResponse) -> None:
+    # Type checker guarantees response.status exists and is a string
+    # Pydantic guarantees it's actually "success" or "error" at runtime
+    if response.status == "success":
+        for item in response.data:  # Type checker knows this is List[dict]
+            process_item(item)
+
+# Runtime validation + static type checking = confidence!
+response = fetch_data_from_api()
+process_response(response)
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const ApiResponseSchema = z.object({
+  status: z.enum(["success", "error"]),
+  data: z.array(z.record(z.unknown())),
+  message: z.string(),
+});
+
+type ApiResponse = z.infer<typeof ApiResponseSchema>;
+
+async function fetchDataFromApi(): Promise<ApiResponse> {
+  // External API call (runtime data!)
+  const rawResponse = await fetch("https://api.example.com/data");
+  const json = await rawResponse.json();
+
+  // Validate that runtime data matches expected structure
+  // If API returns unexpected data, this catches it!
+  return ApiResponseSchema.parse(json);
+}
+
+// Type safety from API boundary through entire app
+function processResponse(response: ApiResponse): void {
+  // TypeScript knows response.status exists and is a string
+  // Zod guarantees it's actually "success" or "error" at runtime
+  if (response.status === "success") {
+    for (const item of response.data) {
+      processItem(item);
+    }
+  }
+}
+
+// Runtime validation + static type checking = confidence!
+const response = await fetchDataFromApi();
+processResponse(response);
+```
+
+:::
+
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Type-safe boundaries**: External data is validated before entering your type-safe code!
+:::
+
+## Eliminates Type/Validation Drift {.smaller}
+
+When you update the schema, types automatically update—impossible for them to become out of sync.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, Field
+from typing import Literal
+
+# Version 1: Original schema
+class UserV1(BaseModel):
+    name: str
+    role: Literal["user", "admin"]
+
+# Version 2: Add new role, change field
+class UserV2(BaseModel):
+    name: str
+    role: Literal["user", "admin", "moderator"]  # Added "moderator"
+    email: str  # Added required email field
+
+# Type checkers immediately catch outdated code
+def process_user(user: UserV2) -> str:
+    # IDE autocomplete shows all three roles
+    if user.role == "moderator":  # New role available
+        return f"Moderator {user.name} ({user.email})"
+    elif user.role == "admin":
+        return f"Admin {user.name}"
+    else:
+        return f"User {user.name}"
+
+# Old code that doesn't handle "moderator" causes type errors
+def old_process_user(user: UserV2) -> str:
+    if user.role == "admin":
+        return "admin"
+    # Type checker warns: not all cases handled!
+    return "user"  # Missing "moderator" case
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+// Version 1: Original schema
+const UserV1Schema = z.object({
+  name: z.string(),
+  role: z.enum(["user", "admin"]),
+});
+
+// Version 2: Add new role, change field
+const UserV2Schema = z.object({
+  name: z.string(),
+  role: z.enum(["user", "admin", "moderator"]),  // Added "moderator"
+  email: z.string(),  // Added required email field
+});
+
+type UserV2 = z.infer<typeof UserV2Schema>;
+
+// TypeScript immediately catches outdated code
+function processUser(user: UserV2): string {
+  // IDE autocomplete shows all three roles
+  if (user.role === "moderator") {  // New role available
+    return `Moderator ${user.name} (${user.email})`;
+  } else if (user.role === "admin") {
+    return `Admin ${user.name}`;
+  } else {
+    return `User ${user.name}`;
+  }
+}
+
+// Old code that doesn't handle "moderator" causes type errors
+function oldProcessUser(user: UserV2): string {
+  if (user.role === "admin") {
+    return "admin";
+  }
+  // TypeScript warns: not all cases handled!
+  return "user";  // Missing "moderator" case
+}
+```
+
+:::
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Single update, everywhere**: Change the schema once, type errors guide you to update all code!
+:::
+
+# Testing
+
+*Reduce test burden with built-in validation*
+
+## Reduced Test Burden {.smaller}
+
+Don't need to write as many validation tests since the library handles edge cases.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Without Pydantic**
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+
+```{python}
+# Need extensive tests for every validation rule
+def test_user_validation():
+    # Test username length
+    with pytest.raises(ValueError):
+        create_user(username="ab")  # Too short
+    with pytest.raises(ValueError):
+        create_user(username="a" * 21)  # Too long
+
+    # Test email format
+    with pytest.raises(ValueError):
+        create_user(email="invalid")
+
+    # Test age range
+    with pytest.raises(ValueError):
+        create_user(age=17)  # Too young
+    with pytest.raises(ValueError):
+        create_user(age=121)  # Too old
+
+    # Test role enum
+    with pytest.raises(ValueError):
+        create_user(role="superuser")  # Invalid
+
+    # ... 50+ more validation tests
+```
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+**With Pydantic**
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+
+```{python}
+from pydantic import BaseModel, Field, EmailStr
+from typing import Literal
+
+class User(BaseModel):
+    username: str = Field(min_length=3, max_length=20)
+    email: EmailStr
+    age: int = Field(ge=18, le=120)
+    role: Literal["user", "admin", "guest"]
+
+# Only test business logic, not validation
+def test_user_permissions():
+    admin = User(username="admin", email="admin@test.com",
+                 age=30, role="admin")
+    assert admin.has_permission("delete_users")
+
+    user = User(username="user", email="user@test.com",
+                age=25, role="user")
+    assert not user.has_permission("delete_users")
+
+# Validation is tested by Pydantic itself
+# No need for 50+ validation tests!
+```
+
+:::
+
+:::
+
+::::
+
+### TypeScript
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Without Zod**
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+
+```{typescript}
+// Need extensive tests for every validation rule
+describe("User validation", () => {
+  // Test username length
+  it("rejects short username", () => {
+    expect(() => createUser({ username: "ab" }))
+      .toThrow();
+  });
+  it("rejects long username", () => {
+    expect(() => createUser({ username: "a".repeat(21) }))
+      .toThrow();
+  });
+
+  // Test email format
+  it("rejects invalid email", () => {
+    expect(() => createUser({ email: "invalid" }))
+      .toThrow();
+  });
+
+  // Test age range
+  it("rejects young age", () => {
+    expect(() => createUser({ age: 17 }))
+      .toThrow();
+  });
+
+  // ... 50+ more validation tests
+});
+```
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+**With Zod**
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+
+```{typescript}
+import { z } from "zod";
+
+const UserSchema = z.object({
+  username: z.string().min(3).max(20),
+  email: z.string().email(),
+  age: z.number().min(18).max(120),
+  role: z.enum(["user", "admin", "guest"]),
+});
+
+type User = z.infer<typeof UserSchema>;
+
+// Only test business logic, not validation
+describe("User permissions", () => {
+  it("admin has delete permission", () => {
+    const admin = UserSchema.parse({
+      username: "admin", email: "admin@test.com",
+      age: 30, role: "admin"
+    });
+    expect(admin.hasPermission("delete_users")).toBe(true);
+  });
+
+  it("user lacks delete permission", () => {
+    const user = UserSchema.parse({
+      username: "user", email: "user@test.com",
+      age: 25, role: "user"
+    });
+    expect(user.hasPermission("delete_users")).toBe(false);
+  });
+});
+
+// Validation is tested by Zod itself!
+```
+
+:::
+
+:::
+
+::::
+
+:::
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Focus on business logic**: Validation testing is delegated to the well-tested library!
+:::
+
+## Easy Mock Data Generation {.smaller}
+
+Many libraries offer utilities to generate valid test data from schemas.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic + Hypothesis)
+
+```{python}
+from pydantic import BaseModel, Field, EmailStr
+from hypothesis import given, strategies as st
+from hypothesis.strategies import builds
+import pydantic
+
+class Product(BaseModel):
+    product_id: str = Field(pattern=r'^PROD-\d+$')
+    name: str = Field(min_length=1, max_length=100)
+    price: float = Field(gt=0, le=10000)
+    in_stock: bool
+
+# Hypothesis can generate valid Product instances automatically
+@given(builds(Product))
+def test_product_discount(product):
+    """Property-based test with auto-generated valid products."""
+    discounted = apply_discount(product, 0.1)
+    assert discounted.price < product.price
+    assert discounted.product_id == product.product_id
+
+# Or use pydantic-factories
+from pydantic_factories import ModelFactory
+
+class ProductFactory(ModelFactory):
+    __model__ = Product
+
+# Generate test data easily
+def test_bulk_operations():
+    products = [ProductFactory.build() for _ in range(100)]
+    result = bulk_update_inventory(products)
+    assert len(result) == 100
+```
+
+### TypeScript (Zod + Faker)
+
+```{typescript}
+import { z } from "zod";
+import { faker } from "@faker-js/faker";
+
+const ProductSchema = z.object({
+  productId: z.string().regex(/^PROD-\d+$/),
+  name: z.string().min(1).max(100),
+  price: z.number().positive().max(10000),
+  inStock: z.boolean(),
+});
+
+type Product = z.infer<typeof ProductSchema>;
+
+// Helper to generate valid Product
+function generateProduct(): Product {
+  return ProductSchema.parse({
+    productId: `PROD-${faker.number.int({ min: 1000, max: 9999 })}`,
+    name: faker.commerce.productName(),
+    price: faker.number.float({ min: 0.01, max: 10000, precision: 0.01 }),
+    inStock: faker.datatype.boolean(),
+  });
+}
+
+// Use in tests
+describe("Product operations", () => {
+  it("should apply discount correctly", () => {
+    const product = generateProduct();
+    const discounted = applyDiscount(product, 0.1);
+    expect(discounted.price).toBeLessThan(product.price);
+    expect(discounted.productId).toBe(product.productId);
+  });
+
+  it("should handle bulk operations", () => {
+    const products = Array.from({ length: 100 }, generateProduct);
+    const result = bulkUpdateInventory(products);
+    expect(result).toHaveLength(100);
+  });
+});
+```
+
+:::
+
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Automated test data**: Generate hundreds of valid test cases from your schema!
+:::
+
+## Contract Testing {.smaller}
+
+Schemas can be shared between frontend/backend or services to ensure compatibility.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python Backend (Pydantic)
+
+```{python}
+# backend/schemas/user.py
+from pydantic import BaseModel, EmailStr
+from datetime import datetime
+
+class UserResponse(BaseModel):
+    """Shared schema for API contract."""
+    user_id: str
+    email: EmailStr
+    username: str
+    created_at: datetime
+    is_verified: bool
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "USR-123",
+                "email": "user@example.com",
+                "username": "johndoe",
+                "created_at": "2024-01-15T10:30:00Z",
+                "is_verified": True
+            }
+        }
+
+# FastAPI automatically generates OpenAPI spec from Pydantic models
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: str) -> UserResponse:
+    """API endpoint with contract defined by Pydantic."""
+    # Response is automatically validated
+    return UserResponse(...)
+```
+
+### TypeScript Frontend (Zod)
+
+```{typescript}
+// frontend/schemas/user.ts
+import { z } from "zod";
+
+// Mirror the backend contract
+export const UserResponseSchema = z.object({
+  user_id: z.string(),
+  email: z.string().email(),
+  username: z.string(),
+  created_at: z.coerce.date(),
+  is_verified: z.boolean(),
+});
+
+export type UserResponse = z.infer<typeof UserResponseSchema>;
+
+// API client with validated responses
+async function getUser(userId: string): Promise<UserResponse> {
+  const response = await fetch(`/api/users/${userId}`);
+  const json = await response.json();
+
+  // Validate that backend actually returns expected structure
+  // Catches API contract violations immediately!
+  return UserResponseSchema.parse(json);
+}
+
+// Usage with guaranteed type safety
+const user = await getUser("USR-123");
+console.log(user.username);  // TypeScript knows this exists
+console.log(user.created_at);  // TypeScript knows this is Date
+```
+
+:::
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**API contracts enforced**: Frontend and backend schemas ensure compatibility at runtime!
+:::
+
+# Security
+
+*Prevent vulnerabilities through validation*
+
+## Input Sanitization {.smaller}
+
+Strips unknown/dangerous fields automatically, preventing mass assignment vulnerabilities.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel
+
+class UserUpdate(BaseModel):
+    """Only these fields can be updated by users."""
+    username: str
+    email: str
+    bio: str
+
+    class Config:
+        extra = 'forbid'  # Reject unknown fields
+
+# Malicious request trying to escalate privileges
+malicious_data = {
+    "username": "hacker",
+    "email": "hacker@evil.com",
+    "bio": "I'm a hacker",
+    "is_admin": True,  # Trying to set admin!
+    "balance": 999999,  # Trying to set account balance!
+}
+
+try:
+    user_update = UserUpdate(**malicious_data)
+except ValidationError as e:
+    # Pydantic rejects unknown fields
+    print("Attack prevented!")
+    # Error: Extra inputs are not permitted
+
+# Safe version - only allowed fields pass through
+safe_data = {
+    "username": "hacker",
+    "email": "hacker@evil.com",
+    "bio": "I'm a hacker"
+}
+user_update = UserUpdate(**safe_data)
+# is_admin and balance are completely ignored
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const UserUpdateSchema = z.object({
+  username: z.string(),
+  email: z.string().email(),
+  bio: z.string(),
+}).strict();  // Reject unknown fields
+
+// Malicious request trying to escalate privileges
+const maliciousData = {
+  username: "hacker",
+  email: "hacker@evil.com",
+  bio: "I'm a hacker",
+  isAdmin: true,  // Trying to set admin!
+  balance: 999999,  // Trying to set account balance!
+};
+
+try {
+  const userUpdate = UserUpdateSchema.parse(maliciousData);
+} catch (error) {
+  // Zod rejects unknown fields
+  console.log("Attack prevented!");
+  // Error: Unrecognized key(s) in object: 'isAdmin', 'balance'
+}
+
+// Safe version - only allowed fields pass through
+const safeData = {
+  username: "hacker",
+  email: "hacker@evil.com",
+  bio: "I'm a hacker"
+};
+const userUpdate = UserUpdateSchema.parse(safeData);
+// isAdmin and balance are completely ignored
+```
+
+:::
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Mass assignment protection**: Attackers can't inject fields to escalate privileges!
+:::
+
+## Type Confusion Prevention {.smaller}
+
+Ensures attackers can't exploit loose type coercion in JavaScript/Python.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, Field
+
+class PaymentRequest(BaseModel):
+    """Strict type validation prevents exploitation."""
+    user_id: str
+    amount: float = Field(gt=0)
+    currency: str = Field(pattern=r'^[A-Z]{3}$')
+
+# Attack: Trying to bypass amount validation with string
+attack_data = {
+    "user_id": "USR-123",
+    "amount": "0.01 OR 1=1",  # SQL injection attempt via type confusion
+    "currency": "USD"
+}
+
+try:
+    payment = PaymentRequest(**attack_data)
+except ValidationError:
+    print("Type confusion attack blocked!")
+    # Error: value is not a valid float
+
+# Attack: Trying to pass array instead of single value
+attack_data2 = {
+    "user_id": ["USR-123", "USR-ADMIN"],  # Array confusion
+    "amount": 10.0,
+    "currency": "USD"
+}
+
+try:
+    payment = PaymentRequest(**attack_data2)
+except ValidationError:
+    print("Type confusion attack blocked!")
+    # Error: str type expected
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const PaymentRequestSchema = z.object({
+  userId: z.string(),
+  amount: z.number().positive(),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+});
+
+// Attack: Trying to bypass amount validation with string
+const attackData = {
+  userId: "USR-123",
+  amount: "0.01 OR 1=1",  // SQL injection attempt via type confusion
+  currency: "USD"
+};
+
+const result = PaymentRequestSchema.safeParse(attackData);
+if (!result.success) {
+  console.log("Type confusion attack blocked!");
+  // Error: Expected number, received string
+}
+
+// Attack: Trying to pass array instead of single value
+const attackData2 = {
+  userId: ["USR-123", "USR-ADMIN"],  // Array confusion
+  amount: 10.0,
+  currency: "USD"
+};
+
+const result2 = PaymentRequestSchema.safeParse(attackData2);
+if (!result2.success) {
+  console.log("Type confusion attack blocked!");
+  // Error: Expected string, received array
+}
+```
+
+:::
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Strict typing**: No loose coercion that attackers can exploit!
+:::
+
+## Size & Range Limits {.smaller}
+
+Enforce constraints on string lengths, number ranges, array sizes to prevent DoS attacks.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, Field, validator
+
+class CommentSubmission(BaseModel):
+    """Constrained inputs prevent resource exhaustion."""
+    post_id: str
+    author: str = Field(min_length=1, max_length=50)
+    content: str = Field(min_length=1, max_length=5000)
+    tags: list[str] = Field(max_length=10)
+    rating: int = Field(ge=1, le=5)
+
+    @validator('tags')
+    def validate_tag_length(cls, tags):
+        if any(len(tag) > 30 for tag in tags):
+            raise ValueError('Tag too long')
+        return tags
+
+# DoS Attack: Massive content to exhaust memory/database
+dos_attack = {
+    "post_id": "POST-123",
+    "author": "attacker",
+    "content": "X" * 1_000_000,  # 1MB of text!
+    "tags": ["spam"] * 1000,  # 1000 tags!
+    "rating": 999  # Out of range
+}
+
+try:
+    comment = CommentSubmission(**dos_attack)
+except ValidationError as e:
+    print("DoS attack prevented!")
+    # Errors:
+    # - content: ensure this value has at most 5000 characters
+    # - tags: ensure this value has at most 10 items
+    # - rating: ensure this value is less than or equal to 5
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const CommentSubmissionSchema = z.object({
+  postId: z.string(),
+  author: z.string().min(1).max(50),
+  content: z.string().min(1).max(5000),
+  tags: z.array(z.string().max(30)).max(10),
+  rating: z.number().int().min(1).max(5),
+});
+
+// DoS Attack: Massive content to exhaust memory/database
+const dosAttack = {
+  postId: "POST-123",
+  author: "attacker",
+  content: "X".repeat(1_000_000),  // 1MB of text!
+  tags: Array(1000).fill("spam"),  // 1000 tags!
+  rating: 999  // Out of range
+};
+
+const result = CommentSubmissionSchema.safeParse(dosAttack);
+if (!result.success) {
+  console.log("DoS attack prevented!");
+  // Errors:
+  // - content: String must contain at most 5000 character(s)
+  // - tags: Array must contain at most 10 element(s)
+  // - rating: Number must be less than or equal to 5
+}
+```
+
+:::
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Resource protection**: Limit input sizes to prevent memory/storage exhaustion attacks!
+:::
+
+# Additional Benefits
+
+*More advantages of using validation libraries*
+
+## API Design & Documentation {.smaller}
+
+Auto-generate OpenAPI/Swagger specs directly from schemas, ensuring docs stay synchronized.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (FastAPI + Pydantic)
+
+```{python}
+from fastapi import FastAPI
+from pydantic import BaseModel, Field, EmailStr
+from typing import List
+
+app = FastAPI(title="User API")
+
+class User(BaseModel):
+    """User model with validation."""
+    user_id: str = Field(description="Unique user identifier")
+    email: EmailStr = Field(description="User's email address")
+    username: str = Field(min_length=3, max_length=20)
+    is_active: bool = Field(default=True)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "USR-123",
+                "email": "john@example.com",
+                "username": "johndoe",
+                "is_active": True
+            }
+        }
+
+@app.post("/users", response_model=User,
+          summary="Create new user",
+          description="Creates a new user with validated data")
+def create_user(user: User) -> User:
+    # FastAPI automatically:
+    # - Validates request body against User schema
+    # - Generates OpenAPI/Swagger docs
+    # - Provides interactive API docs at /docs
+    return user
+
+# Visit /docs for automatically generated interactive documentation!
+# Schema validation = API documentation, always in sync!
+```
+
+### TypeScript (Express + Zod)
+
+```{typescript}
+import express from "express";
+import { z } from "zod";
+import { generateSchema } from "@anatine/zod-openapi";
+
+const UserSchema = z.object({
+  userId: z.string().describe("Unique user identifier"),
+  email: z.string().email().describe("User's email address"),
+  username: z.string().min(3).max(20),
+  isActive: z.boolean().default(true),
+}).openapi({
+  example: {
+    userId: "USR-123",
+    email: "john@example.com",
+    username: "johndoe",
+    isActive: true,
+  },
+});
+
+type User = z.infer<typeof UserSchema>;
+
+const app = express();
+
+app.post("/users", (req, res) => {
+  // Validate request body
+  const result = UserSchema.safeParse(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({ errors: result.error.format() });
+  }
+
+  const user: User = result.data;
+  // ... create user
+  res.json(user);
+});
+
+// Generate OpenAPI spec from Zod schemas
+const openApiSchema = generateSchema(UserSchema);
+// Use with swagger-ui-express for documentation
+```
+
+:::
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Living documentation**: API docs generated from schemas, always accurate!
+:::
+
+## Data Transformation {.smaller}
+
+Built-in serialization/deserialization (e.g., date parsing, nested object handling).
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, Field, validator
+from datetime import datetime
+from typing import Optional
+
+class BlogPost(BaseModel):
+    """Automatic transformation of complex data types."""
+    title: str
+    slug: str
+    published_at: datetime  # Auto-parses ISO strings
+    tags: list[str]
+    view_count: int = 0
+
+    @validator('slug', pre=True, always=True)
+    def generate_slug(cls, v, values):
+        """Auto-generate slug from title if not provided."""
+        if not v and 'title' in values:
+            return values['title'].lower().replace(' ', '-')
+        return v
+
+    class Config:
+        # Serialize datetime as ISO string in JSON
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+# Input with various formats
+raw_data = {
+    "title": "My Blog Post",
+    "published_at": "2024-01-15T10:30:00Z",  # String → datetime
+    "tags": "python,fastapi,pydantic",  # Can use custom parser
+}
+
+post = BlogPost(
+    title="My Blog Post",
+    slug="",  # Auto-generated from title
+    published_at="2024-01-15T10:30:00",  # String → datetime object
+    tags=["python", "fastapi", "pydantic"]
+)
+
+# Serialize back to JSON
+print(post.model_dump_json())
+# {"title":"My Blog Post","slug":"my-blog-post",...}
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const BlogPostSchema = z.object({
+  title: z.string(),
+  slug: z.string().transform((val, ctx) => {
+    // Auto-generate slug if empty
+    return val || ctx.path[0].toString().toLowerCase().replace(/\s+/g, "-");
+  }),
+  publishedAt: z.coerce.date(),  // Auto-parses ISO strings
+  tags: z.union([
+    z.array(z.string()),
+    z.string().transform(s => s.split(","))  // Parse "a,b,c" → ["a","b","c"]
+  ]),
+  viewCount: z.number().default(0),
+});
+
+type BlogPost = z.infer<typeof BlogPostSchema>;
+
+// Input with various formats
+const rawData = {
+  title: "My Blog Post",
+  slug: "",
+  publishedAt: "2024-01-15T10:30:00Z",  // String → Date object
+  tags: "python,fastapi,pydantic",  // String → Array
+};
+
+const post = BlogPostSchema.parse(rawData);
+
+console.log(post.slug);  // "my-blog-post" (auto-generated)
+console.log(post.publishedAt);  // Date object
+console.log(post.tags);  // ["python", "fastapi", "pydantic"]
+
+// Serialize back to JSON
+console.log(JSON.stringify(post));
+```
+
+:::
+
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Smart transformations**: Parse, normalize, and serialize complex data automatically!
+:::
+
+## Developer Experience {.smaller}
+
+Reduces boilerplate and improves onboarding with cross-language consistency.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Without Pydantic**
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+
+```{python}
+# Lots of manual work
+def create_user_without_pydantic(data: dict):
+    # Manual validation
+    if not isinstance(data.get('username'), str):
+        raise ValueError('username must be string')
+    if len(data['username']) < 3:
+        raise ValueError('username too short')
+    if not isinstance(data.get('email'), str):
+        raise ValueError('email must be string')
+    if '@' not in data['email']:
+        raise ValueError('invalid email')
+    # ... 50 more lines of validation
+
+    # Manual type conversion
+    age = int(data.get('age', 0))
+    # ... more conversion
+
+    return {
+        'username': data['username'],
+        'email': data['email'],
+        'age': age,
+        # No IDE autocomplete, no type safety
+    }
+```
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+**With Pydantic**
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+
+```{python}
+from pydantic import BaseModel, EmailStr, Field
+
+# Concise and clear
+class User(BaseModel):
+    username: str = Field(min_length=3)
+    email: EmailStr
+    age: int = Field(ge=0)
+
+# That's it! Full validation, type safety, IDE support
+user = User(**data)  # ← One line replaces 50+ lines
+```
+
+:::
+
+:::
+
+::::
+
+### TypeScript
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Without Zod**
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+
+```{typescript}
+// Lots of manual work
+function createUserWithoutZod(data: any): User {
+  // Manual validation
+  if (typeof data.username !== 'string') {
+    throw new Error('username must be string');
+  }
+  if (data.username.length < 3) {
+    throw new Error('username too short');
+  }
+  if (typeof data.email !== 'string') {
+    throw new Error('email must be string');
+  }
+  if (!data.email.includes('@')) {
+    throw new Error('invalid email');
+  }
+  // ... 50 more lines of validation
+
+  // Manual type conversion
+  const age = Number(data.age || 0);
+  // ... more conversion
+
+  return {
+    username: data.username,
+    email: data.email,
+    age: age,
+    // No runtime validation, types could be wrong
+  };
+}
+```
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+**With Zod**
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+
+```{typescript}
+import { z } from "zod";
+
+// Concise and clear
+const UserSchema = z.object({
+  username: z.string().min(3),
+  email: z.string().email(),
+  age: z.number().nonnegative(),
+});
+
+type User = z.infer<typeof UserSchema>;
+
+// That's it! Full validation, type safety, IDE support
+const user = UserSchema.parse(data);  // ← One line replaces 50+ lines
+```
+
+:::
+
+:::
+
+::::
+
+:::
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Less code, more confidence**: Reduce boilerplate by 90% while improving safety!
+:::
+
+# Summary
+
+*Creating a validated type system that works at runtime*
+
+## Key Takeaways {.smaller}
+
+Data validation libraries like Pydantic and Zod transform how we build applications:
+
+. . .
+
+::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin: 15px 0;"}
+
+**Readability**: Self-documenting schemas that serve as single source of truth
+
+**Runtime Safety**: Catch errors at system boundaries before they propagate
+
+**Type Safety**: Bridge the gap between static types and runtime data
+
+**Testing**: Reduce test burden and generate mock data easily
+
+**Security**: Prevent injection, mass assignment, and DoS attacks
+
+**Maintainability**: Update once, changes propagate everywhere
+
+**Developer Experience**: Less boilerplate, better IDE support, faster onboarding
+
+:::
+
+. . .
+
+::: {style="background-color: #FFFBC1; padding: 20px; border-radius: 25px; text-align: center; font-size: 1.1em; margin-top: 20px;"}
+
+**Parse, don't pray!** Validate data at boundaries and trust it throughout your application.
+
+:::
+
+## Resources {.smaller}
+
+Learn more about these powerful libraries:
+
+::: {style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 15px;"}
+
+### Pydantic (Python)
+
+- **Documentation**: [docs.pydantic.dev](https://docs.pydantic.dev/latest/)
+- **GitHub**: [github.com/pydantic/pydantic](https://github.com/pydantic/pydantic)
+- **Key Features**: Type validation, data parsing, FastAPI integration, JSON Schema generation
+
+### Zod (TypeScript)
+
+- **Documentation**: [zod.dev](https://zod.dev/)
+- **GitHub**: [github.com/colinhacks/zod](https://github.com/colinhacks/zod)
+- **Key Features**: Type inference, composable schemas, async validation, error formatting
+
+### Related Tools
+
+- **FastAPI**: Python web framework with built-in Pydantic support
+- **tRPC**: TypeScript RPC framework with Zod integration
+- **Hypothesis**: Property-based testing with Pydantic
+- **@faker-js/faker**: Test data generation for TypeScript
+
+:::
+
+# Thank You!
+
+And Happy Parsing! 🎉
+
+::: {.footer style="text-align: center; font-size: 0.55em; color: #999; position: absolute; bottom: 20px; left: 0; right: 0;"}
+Questions? Discussion? Visit: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/IndrajeetPatil/parse-dont-pray/)
+:::
+
+# For more {data-visibility="uncounted"}
+
+If you are interested in good programming and software development practices, check out my other [slide decks](https://sites.google.com/site/indrajeetspatilmorality/presentations).
+
+# Find me at... {data-visibility="uncounted"}
+
+{{< fa brands linkedin >}} [LinkedIn](https://www.linkedin.com/in/indrajeet-patil-ph-d-397865174/)
+
+{{< fa brands github >}} [GitHub](http://github.com/IndrajeetPatil)
+
+{{< fa solid link >}} [Website](https://sites.google.com/site/indrajeetspatilmorality/)
+
+{{< fa solid envelope >}} [E-mail](mailto:patilindrajeet.science@gmail.com)
