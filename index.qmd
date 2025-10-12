@@ -93,6 +93,73 @@ Examples assume a **Python-TypeScript** full-stack, but the outlined principles 
 
 :::
 
+## Dynamic vs Static Typing {.smaller}
+
+Understanding the type system helps explain why data validation is crucial.
+
+. . .
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px;"}
+
+**Statically Typed** (e.g., Java, C++, Rust)
+
+- Types checked at **compile time**
+- Type errors caught before runtime
+- More verbose type declarations
+- Compiler guarantees type safety
+
+```rust
+fn greet(name: String) -> String {
+    format!("Hello, {}!", name)
+}
+
+// Won't compile: type mismatch
+greet(42);  // Error at compile time
+```
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {style="background-color: #fff3e0; padding: 20px; border-radius: 10px;"}
+
+**Dynamically Typed** (e.g., Python, JavaScript)
+
+- Types checked at **runtime**
+- Type errors appear during execution
+- More flexible, less verbose
+- No compile-time type guarantees
+
+```python
+def greet(name):
+    return f"Hello, {name}!"
+
+# Runs fine, even with wrong type
+greet(42)  # "Hello, 42!"
+# Type error only if you use string methods
+greet(42).upper()  # Runtime error!
+```
+
+:::
+
+:::
+
+::::
+
+. . .
+
+::: {style="background-color: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center;"}
+
+**Why validation matters more for dynamic languages**: Without compile-time checks, you need **runtime validation** to ensure data integrity. Validation libraries bridge this gap!
+
+:::
+
 ## What is Data Validation? {.smaller}
 
 Data validation is the process of ensuring that data meets specific criteria before it's used in your application.
@@ -414,6 +481,199 @@ type User = z.infer<typeof UserSchema>;
 
 ::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 **Result**: Reduced cognitive load—focus on business logic, not validation boilerplate!
+:::
+
+## Specific Types Over Generic {.smaller}
+
+Using specific, domain-appropriate types dramatically improves code readability and catches errors early.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="33%"}
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+
+**❌ Generic: `str`**
+
+```{python}
+class User(BaseModel):
+    email: str
+```
+
+- Accepts any string
+- No validation
+- Unclear intent
+
+:::
+
+:::
+
+::: {.column width="33%"}
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 8px;"}
+
+**⚠️ Better: `EmailStr`**
+
+```{python}
+from pydantic import EmailStr
+
+class User(BaseModel):
+    email: EmailStr
+```
+
+- Validates email format
+- Self-documenting
+- Still generic
+
+:::
+
+:::
+
+::: {.column width="33%"}
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+
+**✅ Best: `AcmeEmailStr`**
+
+```{python}
+from pydantic import field_validator
+
+class AcmeEmailStr(EmailStr):
+    @field_validator('email')
+    def must_be_acme(cls, v):
+        if not v.endswith('@acme.com'):
+            raise ValueError('Must be @acme.com')
+        return v
+
+class User(BaseModel):
+    email: AcmeEmailStr
+```
+
+- Domain-specific
+- Business rule enforced
+- Crystal clear intent
+
+:::
+
+:::
+
+::::
+
+**Another example: Model temperature constraints**
+
+```{python}
+from pydantic import Field, confloat
+
+class LLMConfig(BaseModel):
+    # Bad: Unclear bounds
+    temperature: float
+
+    # Better: Explicit validation
+    temperature: float = Field(ge=0.0, le=2.0)
+
+    # Best: Self-documenting type
+    temperature: confloat(ge=0.0, le=2.0)  # NonNegativeFloat constrained to [0.0, 2.0]
+```
+
+### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="33%"}
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+
+**❌ Generic: `string`**
+
+```{typescript}
+const UserSchema = z.object({
+  email: z.string(),
+});
+```
+
+- Accepts any string
+- No validation
+- Unclear intent
+
+:::
+
+:::
+
+::: {.column width="33%"}
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 8px;"}
+
+**⚠️ Better: `.email()`**
+
+```{typescript}
+const UserSchema = z.object({
+  email: z.string().email(),
+});
+```
+
+- Validates email format
+- Self-documenting
+- Still generic
+
+:::
+
+:::
+
+::: {.column width="33%"}
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+
+**✅ Best: Custom refinement**
+
+```{typescript}
+const acmeEmail = z
+  .string()
+  .email()
+  .refine(
+    (email) => email.endsWith('@acme.com'),
+    { message: 'Must be @acme.com email' }
+  );
+
+const UserSchema = z.object({
+  email: acmeEmail,
+});
+```
+
+- Domain-specific
+- Business rule enforced
+- Crystal clear intent
+
+:::
+
+:::
+
+::::
+
+**Another example: Model temperature constraints**
+
+```{typescript}
+const LLMConfigSchema = z.object({
+  // Bad: Unclear bounds
+  temperature: z.number(),
+
+  // Better: Explicit validation
+  temperature: z.number().min(0.0).max(2.0),
+
+  // Best: Extracted for reuse
+  temperature: z.number().min(0.0).max(2.0).brand('ModelTemperature'),
+});
+```
+
+:::
+
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+**Progression**: `str` → `EmailStr` → `AcmeEmailStr` = **Increasing specificity = Better readability**
 :::
 
 # Runtime Behavior
@@ -1733,6 +1993,111 @@ console.log(JSON.stringify(post));
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 **Smart transformations**: Parse, normalize, and serialize complex data automatically!
+:::
+
+## Immutable Configs: Validate Once, Done {.smaller}
+
+For data that shouldn't change after creation, use frozen/immutable models to validate once and guarantee immutability.
+
+. . .
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+```{python}
+from pydantic import BaseModel, Field
+
+class DatabaseConfig(BaseModel):
+    """Configuration validated at startup, frozen for safety."""
+    host: str
+    port: int = Field(ge=1, le=65535)
+    database: str
+    max_connections: int = Field(ge=1, le=100)
+    timeout_seconds: int = Field(ge=1)
+
+    class Config:
+        frozen = True  # Immutable after creation
+
+# Validated once at application startup
+db_config = DatabaseConfig(
+    host="localhost",
+    port=5432,
+    database="myapp",
+    max_connections=20,
+    timeout_seconds=30
+)
+
+# Guaranteed valid throughout application lifecycle
+# Attempts to modify raise an error
+try:
+    db_config.port = 9999  # ValidationError: "Instance is frozen"
+except ValidationError as e:
+    print("Config is immutable!")
+
+# Use confidently without re-validation
+def connect_db():
+    # No need to re-validate - guaranteed correct
+    connection = psycopg2.connect(
+        host=db_config.host,  # Always valid
+        port=db_config.port,  # Always in range 1-65535
+        database=db_config.database
+    )
+```
+
+### TypeScript (Zod)
+
+```{typescript}
+import { z } from "zod";
+
+const DatabaseConfigSchema = z.object({
+  host: z.string(),
+  port: z.number().int().min(1).max(65535),
+  database: z.string(),
+  maxConnections: z.number().int().min(1).max(100),
+  timeoutSeconds: z.number().int().min(1),
+}).readonly();  // Immutable after creation
+
+type DatabaseConfig = z.infer<typeof DatabaseConfigSchema>;
+
+// Validated once at application startup
+const dbConfig = DatabaseConfigSchema.parse({
+  host: "localhost",
+  port: 5432,
+  database: "myapp",
+  maxConnections: 20,
+  timeoutSeconds: 30,
+}) as Readonly<DatabaseConfig>;
+
+// Guaranteed valid throughout application lifecycle
+// TypeScript prevents modification at compile time
+// dbConfig.port = 9999;  // TypeScript error: Cannot assign to 'port' because it is a read-only property
+
+// Use confidently without re-validation
+function connectDb() {
+  // No need to re-validate - guaranteed correct
+  const connection = createConnection({
+    host: dbConfig.host,  // Always valid
+    port: dbConfig.port,  // Always in range 1-65535
+    database: dbConfig.database,
+  });
+}
+```
+
+:::
+
+. . .
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px;"}
+
+**Benefits of frozen/immutable configs**:
+
+- ✅ **Validate once at startup**, use everywhere without re-checking
+- ✅ **Prevent accidental mutations** that could break application state
+- ✅ **Thread-safe** - no risk of concurrent modifications
+- ✅ **Clearer intent** - signals this data is meant to be constant
+- ✅ **Performance** - no validation overhead after initial parse
+
 :::
 
 ## Developer Experience {.smaller}
