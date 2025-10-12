@@ -1419,19 +1419,13 @@ Shared schemas between frontend/backend ensure compatibility.
 
 ```{python}
 # backend/schemas/user.py
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 
 class UserResponse(BaseModel):
     """Shared schema for API contract."""
-    user_id: str
-    email: EmailStr
-    username: str
-    created_at: datetime
-    is_verified: bool
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "user_id": "USR-123",
                 "email": "user@example.com",
@@ -1440,6 +1434,13 @@ class UserResponse(BaseModel):
                 "is_verified": True
             }
         }
+    )
+
+    user_id: str
+    email: EmailStr
+    username: str
+    created_at: datetime
+    is_verified: bool
 
 # FastAPI automatically generates OpenAPI spec from Pydantic models
 from fastapi import FastAPI
@@ -1507,14 +1508,13 @@ Strips unknown/dangerous fields automatically—prevents mass assignment vulnera
 ### Python (Pydantic)
 
 ```{python}
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class UserUpdate(BaseModel):
     """Only these fields can be updated by users."""
-    email: str
+    model_config = ConfigDict(extra='forbid')  # Reject unknown fields
 
-    class Config:
-        extra = 'forbid'  # Reject unknown fields
+    email: str
 
 # Malicious request trying to escalate privileges
 malicious_data = {
@@ -1762,20 +1762,15 @@ Auto-generate OpenAPI/Swagger specs from schemas—docs stay synchronized.
 
 ```{python}
 from fastapi import FastAPI
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List
 
 app = FastAPI(title="User API")
 
 class User(BaseModel):
     """User model with validation."""
-    user_id: str = Field(description="Unique user identifier")
-    email: EmailStr = Field(description="User's email address")
-    username: str = Field(min_length=3, max_length=20)
-    is_active: bool = Field(default=True)
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "user_id": "USR-123",
                 "email": "john@example.com",
@@ -1783,6 +1778,12 @@ class User(BaseModel):
                 "is_active": True
             }
         }
+    )
+
+    user_id: str = Field(description="Unique user identifier")
+    email: EmailStr = Field(description="User's email address")
+    username: str = Field(min_length=3, max_length=20)
+    is_active: bool = Field(default=True)
 
 @app.post("/users", response_model=User,
           summary="Create new user",
@@ -1858,12 +1859,19 @@ Built-in serialization/deserialization—date parsing, nested object handling.
 ### Python (Pydantic)
 
 ```{python}
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, ConfigDict
 from datetime import datetime
 from typing import Optional
 
 class BlogPost(BaseModel):
     """Automatic transformation of complex data types."""
+    model_config = ConfigDict(
+        # Serialize datetime as ISO string in JSON
+        json_encoders={
+            datetime: lambda value: value.isoformat()
+        }
+    )
+
     title: str
     slug: str
     published_at: datetime  # Auto-parses ISO strings
@@ -1876,12 +1884,6 @@ class BlogPost(BaseModel):
         if not value and 'title' in values:
             return values['title'].lower().replace(' ', '-')
         return value
-
-    class Config:
-        # Serialize datetime as ISO string in JSON
-        json_encoders = {
-            datetime: lambda value: value.isoformat()
-        }
 
 # Input with various formats
 raw_data = {
@@ -1958,18 +1960,17 @@ Frozen/immutable models validate once and guarantee immutability.
 ### Python (Pydantic)
 
 ```{python}
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class DatabaseConfig(BaseModel):
     """Configuration validated at startup, frozen for safety."""
+    model_config = ConfigDict(frozen=True)  # Immutable after creation
+
     host: str
     port: int = Field(ge=1, le=65535)
     database: str
     max_connections: int = Field(ge=1, le=100)
     timeout_seconds: int = Field(ge=1)
-
-    class Config:
-        frozen = True  # Immutable after creation
 
 # Validated once at application startup
 db_config = DatabaseConfig(
