@@ -520,7 +520,7 @@ Specific, domain-appropriate types improve readability and catch errors early.
 
 :::: {.columns}
 
-::: {.column width="33%"}
+::: {.column width="24%"}
 
 ::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -539,7 +539,7 @@ class User(BaseModel):
 
 :::
 
-::: {.column width="33%"}
+::: {.column width="38%"}
 
 ::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -560,7 +560,7 @@ class User(BaseModel):
 
 :::
 
-::: {.column width="33%"}
+::: {.column width="38%"}
 
 ::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -594,7 +594,7 @@ class User(BaseModel):
 
 :::: {.columns}
 
-::: {.column width="33%"}
+::: {.column width="24%"}
 
 ::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -614,7 +614,7 @@ const UserSchema = z.object({
 
 :::
 
-::: {.column width="33%"}
+::: {.column width="38%"}
 
 ::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -634,7 +634,7 @@ const UserSchema = z.object({
 
 :::
 
-::: {.column width="33%"}
+::: {.column width="38%"}
 
 ::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -666,7 +666,7 @@ const UserSchema = z.object({
 
 :::
 
-::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;" .fragment}
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 **Progression**: `str` → `EmailStr` → `AcmeEmailStr` = **Increasing specificity = Better readability**
 :::
 
@@ -684,7 +684,7 @@ Model temperature constraints with increasing specificity.
 
 :::: {.columns}
 
-::: {.column width="33%" .fragment}
+::: {.column width="24%"}
 
 ::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -703,7 +703,7 @@ class LLMConfig(BaseModel):
 
 :::
 
-::: {.column width="33%" .fragment}
+::: {.column width="38%"}
 
 ::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -724,7 +724,7 @@ class LLMConfig(BaseModel):
 
 :::
 
-::: {.column width="33%" .fragment}
+::: {.column width="38%"}
 
 ::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -751,7 +751,7 @@ class LLMConfig(BaseModel):
 
 :::: {.columns}
 
-::: {.column width="33%" .fragment}
+::: {.column width="24%"}
 
 ::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -771,7 +771,7 @@ const LLMConfigSchema = z.object({
 
 :::
 
-::: {.column width="33%" .fragment}
+::: {.column width="38%"}
 
 ::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -791,7 +791,7 @@ const LLMConfigSchema = z.object({
 
 :::
 
-::: {.column width="33%" .fragment}
+::: {.column width="38%"}
 
 ::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
@@ -817,7 +817,7 @@ const LLMConfigSchema = z.object({
 
 :::
 
-::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;" .fragment}
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 **Progression**: `float` → `Field(ge, le)` → `confloat` = **Increasing specificity = Better constraints**
 :::
 
