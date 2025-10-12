@@ -317,7 +317,6 @@ from datetime import datetime
 from uuid import UUID
 
 class Order(BaseModel):
-    """Single source for order structure, validation, and types."""
     order_id: str
     customer_id: UUID
     total_amount: float = Field(gt=0)
@@ -971,13 +970,11 @@ from pydantic import BaseModel, Field
 from typing import List
 
 class ApiResponse(BaseModel):
-    """API response is validated at runtime."""
     status: str = Field(pattern=r'^(success|error)$')
     data: List[dict]
     message: str
 
 def fetch_data_from_api() -> ApiResponse:
-    """Type checker knows this returns ApiResponse."""
     # External API call (runtime data!)
     raw_response = requests.get("https://api.example.com/data").json()
 
@@ -1342,7 +1339,6 @@ class Product(BaseModel):
 # Hypothesis can generate valid Product instances automatically
 @given(builds(Product))
 def test_product_discount(product):
-    """Property-based test with auto-generated valid products."""
     discounted = apply_discount(product, 0.1)
     assert discounted.price < product.price
     assert discounted.product_id == product.product_id
@@ -1424,7 +1420,6 @@ from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 
 class UserResponse(BaseModel):
-    """Shared schema for API contract."""
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -1450,7 +1445,6 @@ app = FastAPI()
 
 @app.get("/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: str) -> UserResponse:
-    """API endpoint with contract defined by Pydantic."""
     # Response is automatically validated
     return UserResponse(...)
 ```
@@ -1512,7 +1506,6 @@ Strips unknown/dangerous fields automatically—prevents mass assignment vulnera
 from pydantic import BaseModel, ConfigDict
 
 class UserUpdate(BaseModel):
-    """Only these fields can be updated by users."""
     model_config = ConfigDict(extra='forbid')  # Reject unknown fields
 
     email: str
@@ -1587,7 +1580,6 @@ Prevents exploitation of loose type coercion in JavaScript/Python.
 from pydantic import BaseModel, Field
 
 class PaymentRequest(BaseModel):
-    """Strict type validation prevents exploitation."""
     user_id: str
     amount: float = Field(gt=0)
     currency: str = Field(pattern=r'^[A-Z]{3}$')
@@ -1677,7 +1669,6 @@ Constraints on string lengths, number ranges, array sizes prevent DoS attacks.
 from pydantic import BaseModel, Field, field_validator
 
 class CommentSubmission(BaseModel):
-    """Constrained inputs prevent resource exhaustion."""
     post_id: str
     author: str = Field(min_length=1, max_length=50)
     content: str = Field(min_length=1, max_length=5000)
@@ -1770,7 +1761,6 @@ from typing import List
 app = FastAPI(title="User API")
 
 class User(BaseModel):
-    """User model with validation."""
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -1865,7 +1855,6 @@ from pydantic import BaseModel, Field, model_validator, field_serializer
 from datetime import datetime
 
 class BlogPost(BaseModel):
-    """Automatic transformation of complex data types."""
     title: str
     slug: str
     published_at: datetime  # Auto-parses ISO strings
@@ -1875,14 +1864,12 @@ class BlogPost(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def generate_slug(cls, values):
-        """Auto-generate slug from title if not provided."""
         if not values.get('slug') and 'title' in values:
             values['slug'] = values['title'].lower().replace(' ', '-')
         return values
 
     @field_serializer('published_at')
     def serialize_datetime(self, value: datetime) -> str:
-        """Serialize datetime as ISO string in JSON."""
         return value.isoformat()
 
 # Input with various formats
@@ -1963,7 +1950,6 @@ Frozen/immutable models validate once and guarantee immutability.
 from pydantic import BaseModel, Field, ConfigDict
 
 class DatabaseConfig(BaseModel):
-    """Configuration validated at startup, frozen for safety."""
     model_config = ConfigDict(frozen=True)  # Immutable after creation
 
     host: str
