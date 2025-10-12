@@ -373,10 +373,6 @@ const order = OrderSchema.parse({
 
 ## Declarative Syntax {.smaller}
 
-Describes *what* the data should look like, not *how* to validate it.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python
@@ -495,8 +491,8 @@ type User = z.infer<typeof UserSchema>;
 
 :::
 
-::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-**Result**: Reduced cognitive load—focus on business logic, not validation boilerplate!
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+Describes *what* the data should look like, not *how* to validate it.
 :::
 
 ## Specific Types Over Generic {.smaller}
@@ -669,10 +665,6 @@ const UserSchema = z.object({
 
 ## Automatic Validation {.smaller}
 
-Data validated as it enters the system, catching errors early.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
@@ -726,7 +718,7 @@ const validProduct = ProductPriceSchema.parse({
 try {
   const invalidProduct = ProductPriceSchema.parse({
     productId: "PROD-123",
-    price: -10, // Negative price!
+    price: -10,     // Negative price!
     currency: "US", // Invalid currency format!
   });
 } catch (error) {
@@ -735,6 +727,10 @@ try {
 }
 ```
 
+:::
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+Data validated as it enters the system, catching errors early.
 :::
 
 ## Data Coercion & Parsing {.smaller}
@@ -805,10 +801,6 @@ console.log(event.attendees);  // ["Alice", "Bob"]
 
 ## Detailed Error Messages {.smaller}
 
-Specific, actionable feedback about what's wrong and where.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
@@ -819,15 +811,11 @@ from pydantic import BaseModel, ValidationError, EmailStr, Field
 class SignupForm(BaseModel):
     username: str = Field(min_length=3)
     email: EmailStr
-    age: int = Field(ge=13)
-    password: str = Field(min_length=8)
 
 try:
     user = SignupForm(
-        username="ab",            # Too short
-        email="not-an-email",     # Invalid format
-        age=10,                   # Too young
-        password="short"          # Too short
+        username="ab",        # Too short
+        email="not-an-email", # Invalid format
     )
 except ValidationError as e:
     print(e.json(indent=2))
@@ -842,8 +830,7 @@ except ValidationError as e:
     #     "loc": ["email"],
     #     "msg": "value is not a valid email address",
     #     "type": "value_error.email"
-    #   },
-    #   ...
+    #   }
     # ]
 ```
 
@@ -855,15 +842,11 @@ import { z } from "zod";
 const SignupFormSchema = z.object({
   username: z.string().min(3),
   email: z.string().email(),
-  age: z.number().min(13),
-  password: z.string().min(8),
 });
 
 const result = SignupFormSchema.safeParse({
   username: "ab",            // Too short
   email: "not-an-email",     // Invalid format
-  age: 10,                   // Too young
-  password: "short"          // Too short
 });
 
 if (!result.success) {
@@ -871,9 +854,7 @@ if (!result.success) {
   // Output:
   // {
   //   "username": { "_errors": ["String must contain at least 3 character(s)"] },
-  //   "email": { "_errors": ["Invalid email"] },
-  //   "age": { "_errors": ["Number must be greater than or equal to 13"] },
-  //   "password": { "_errors": ["String must contain at least 8 character(s)"] }
+  //   "email": { "_errors": ["Invalid email"] }
   // }
 }
 ```
@@ -881,7 +862,7 @@ if (!result.success) {
 :::
 
 ::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-**Developer-friendly**: Know exactly what's wrong, where it's wrong, and what's expected!
+Specific, actionable feedback about what's wrong and where.
 :::
 
 # Typing
@@ -1530,18 +1511,14 @@ from pydantic import BaseModel
 
 class UserUpdate(BaseModel):
     """Only these fields can be updated by users."""
-    username: str
     email: str
-    bio: str
 
     class Config:
         extra = 'forbid'  # Reject unknown fields
 
 # Malicious request trying to escalate privileges
 malicious_data = {
-    "username": "hacker",
     "email": "hacker@evil.com",
-    "bio": "I'm a hacker",
     "is_admin": True,  # Trying to set admin!
     "balance": 999999,  # Trying to set account balance!
 }
@@ -1554,11 +1531,7 @@ except ValidationError as e:
     # Error: Extra inputs are not permitted
 
 # Safe version - only allowed fields pass through
-safe_data = {
-    "username": "hacker",
-    "email": "hacker@evil.com",
-    "bio": "I'm a hacker"
-}
+safe_data = {"email": "hacker@evil.com"}
 user_update = UserUpdate(**safe_data)
 # is_admin and balance are completely ignored
 ```
@@ -1569,16 +1542,12 @@ user_update = UserUpdate(**safe_data)
 import { z } from "zod";
 
 const UserUpdateSchema = z.object({
-  username: z.string(),
   email: z.string().email(),
-  bio: z.string(),
 }).strict();  // Reject unknown fields
 
 // Malicious request trying to escalate privileges
 const maliciousData = {
-  username: "hacker",
   email: "hacker@evil.com",
-  bio: "I'm a hacker",
   isAdmin: true,  // Trying to set admin!
   balance: 999999,  // Trying to set account balance!
 };
@@ -1592,11 +1561,7 @@ try {
 }
 
 // Safe version - only allowed fields pass through
-const safeData = {
-  username: "hacker",
-  email: "hacker@evil.com",
-  bio: "I'm a hacker"
-};
+const safeData = { email: "hacker@evil.com" };
 const userUpdate = UserUpdateSchema.parse(safeData);
 // isAdmin and balance are completely ignored
 ```
@@ -2279,7 +2244,7 @@ Data validation libraries like Pydantic and Zod transform how we build applicati
 
 Learn more about these powerful libraries:
 
-::: {style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 15px;"}
+::: {style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 15px; font-size: 0.75em;"}
 
 ### Pydantic (Python)
 
