@@ -33,37 +33,23 @@ canonical-url: "https://indrajeetpatil.github.io/parse-dont-pray/"
 knitr::opts_chunk$set(eval = FALSE)
 ```
 
-## Parse, Don't Pray {style="margin-top: 1em; margin-bottom: 2.5em;"}
+## {style="margin-top: 1em;"}
 
-:::: {.columns}
+::: {style="text-align: center;"}
 
-::: {.column width="50%"}
-
-::: {style="margin-top: 2em; padding: 1.5em 0;"}
-
-::: {style="font-size: 0.9em; font-weight: bold;"}
-The Case for Data Validation
+::: {style="font-size: 1.3em; font-weight: bold; margin-bottom: 0.4em;"}
+Parse, Don't Pray: The Case for Data Validation
 :::
 
-::: {style="font-size: 0.8em; margin-top: 1em;"}
+::: {style="font-size: 0.9em; margin-bottom: 1em;"}
 Indrajeet Patil
 :::
 
+::: {style="display: flex; justify-content: center;"}
+![](media/social-media-card.jpg){width="70%" fig-alt="Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"}
 :::
 
 :::
-
-::: {.column width="50%"}
-
-::: {style="margin-top: 2em;"}
-
-![](media/social-media-card.jpg){width="100%" fig-alt="Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"}
-
-:::
-
-:::
-
-::::
 
 ::: {.footer style="text-align: center; font-size: 0.55em; color: #999; position: absolute; bottom: 20px; left: 0; right: 0;"}
 Source code: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/IndrajeetPatil/parse-dont-pray/)
@@ -93,25 +79,30 @@ Examples assume a **Python-TypeScript** full-stack, but the outlined principles 
 
 :::
 
+# Introduction
+
+*Why data validation matters*
+
 ## Dynamic vs Static Typing {.smaller}
 
-Understanding the type system helps explain why data validation is crucial.
-
-. . .
+Understanding type systems explains why data validation is crucial.
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column width="50%" .fragment}
 
-::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px;"}
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; font-size: 0.85em;"}
 
+::: {style="font-size: 1.05em; font-weight: bold; margin-bottom: 8px;"}
 **Statically Typed** (e.g., Java, C++, Rust)
+:::
 
 - Types checked at **compile time**
 - Type errors caught before runtime
 - More verbose type declarations
 - Compiler guarantees type safety
 
+::: {style="font-size: 1.1em;"}
 ```rust
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
@@ -120,24 +111,28 @@ fn greet(name: String) -> String {
 // Won't compile: type mismatch
 greet(42);  // Error at compile time
 ```
-
 :::
 
 :::
 
-::: {.column width="50%"}
+:::
 
-::: {style="background-color: #fff3e0; padding: 20px; border-radius: 10px;"}
+::: {.column width="50%" .fragment}
 
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; font-size: 0.85em;"}
+
+::: {style="font-size: 1.05em; font-weight: bold; margin-bottom: 8px;"}
 **Dynamically Typed** (e.g., Python, JavaScript)
+:::
 
 - Types checked at **runtime**
 - Type errors appear during execution
 - More flexible, less verbose
 - No compile-time type guarantees
 
+::: {style="font-size: 1.1em;"}
 ```python
-def greet(name):
+def greet(name: str) -> str:
     return f"Hello, {name}!"
 
 # Runs fine, even with wrong type
@@ -145,6 +140,7 @@ greet(42)  # "Hello, 42!"
 # Type error only if you use string methods
 greet(42).upper()  # Runtime error!
 ```
+:::
 
 :::
 
@@ -154,7 +150,7 @@ greet(42).upper()  # Runtime error!
 
 . . .
 
-::: {style="background-color: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center;"}
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; font-size: 0.9em;"}
 
 **Why validation matters more for dynamic languages**: Without compile-time checks, you need **runtime validation** to ensure data integrity. Validation libraries bridge this gap!
 
@@ -162,28 +158,58 @@ greet(42).upper()  # Runtime error!
 
 ## What is Data Validation? {.smaller}
 
-Data validation is the process of ensuring that data meets specific criteria before it's used in your application.
+Ensuring data meets specific criteria before use.
 
-. . .
+:::: {.columns}
 
-::: {style="background-color: #fff3e0; padding: 20px; border-radius: 10px; margin: 20px 0;"}
+::: {.column width="50%" .fragment}
 
-**Without validation libraries**, you write manual checks scattered throughout your code:
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; font-size: 0.85em;"}
+
+::: {style="font-size: 1.05em; font-weight: bold; margin-bottom: 8px;"}
+**❌ Without validation libraries**
+:::
+
+Manual checks scattered throughout code:
 
 - Type checking (`isinstance`, `typeof`)
 - Range validation (`age >= 18`)
 - Format validation (email regex, URL patterns)
 - Custom business rules
-
-**With validation libraries**, you define schemas that automatically validate, parse, and type your data.
+- Logic spreads across codebase
+- Difficult to maintain
 
 :::
+
+:::
+
+::: {.column width="50%" .fragment}
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; font-size: 0.85em;"}
+
+::: {style="font-size: 1.05em; font-weight: bold; margin-bottom: 8px;"}
+**✅ With validation libraries**
+:::
+
+Schemas automatically validate, parse, and type data:
+
+- Centralized validation rules
+- Self-documenting structures
+- Automatic type coercion
+- Detailed error messages
+- Runtime type safety
+
+:::
+
+:::
+
+::::
 
 ## Meet the Libraries {.smaller}
 
 :::: {.columns}
 
-::: {.column width="50%"}
+::: {.column width="50%" .fragment}
 
 ::: {style="background-color: #ffffff; border: 2px solid #E92063; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85em;"}
 
@@ -199,7 +225,6 @@ Data validation is the process of ensuring that data meets specific criteria bef
 - Automatic type coercion and parsing
 - Integration with FastAPI, SQLModel, and more
 - JSON Schema generation
-- V2 offers 5-50x performance improvements
 
 ::: {style="text-align: center; margin-top: 10px; font-size: 0.95em;"}
 [docs.pydantic.dev](https://docs.pydantic.dev/latest/)
@@ -209,7 +234,7 @@ Data validation is the process of ensuring that data meets specific criteria bef
 
 :::
 
-::: {.column width="50%"}
+::: {.column width="50%" .fragment}
 
 ::: {style="background-color: #ffffff; border: 2px solid #3E67B1; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85em;"}
 
@@ -247,7 +272,7 @@ Data validation is the process of ensuring that data meets specific criteria bef
 
 ## Self-Documenting Schemas {.smaller}
 
-Validation rules serve as inline documentation, making it immediately clear what data structure is expected.
+Validation rules serve as inline documentation.
 
 . . .
 
@@ -292,7 +317,7 @@ The schema **is** the documentation—no separate docs needed!
 
 ## Single Source of Truth {.smaller}
 
-Schema definition, validation logic, and type information all live in one place instead of being scattered across the codebase.
+Schema definition, validation logic, and type information in one place.
 
 . . .
 
@@ -357,7 +382,7 @@ const order = OrderSchema.parse({
 
 ## Declarative Syntax {.smaller}
 
-Describes *what* the data should look like rather than *how* to validate it, reducing cognitive load.
+Describes *what* the data should look like, not *how* to validate it.
 
 . . .
 
@@ -483,11 +508,11 @@ type User = z.infer<typeof UserSchema>;
 **Result**: Reduced cognitive load—focus on business logic, not validation boilerplate!
 :::
 
-## Specific Types Over Generic {.smaller}
+## Specific Types Over Generic: Example-1 {.smaller}
 
-Using specific, domain-appropriate types dramatically improves code readability and catches errors early.
+Specific, domain-appropriate types improve readability and catch errors early.
 
-. . .
+::: {style="font-size: 0.85em;"}
 
 ::: {.panel-tabset}
 
@@ -497,7 +522,7 @@ Using specific, domain-appropriate types dramatically improves code readability 
 
 ::: {.column width="33%"}
 
-::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
 **❌ Generic: `str`**
 
@@ -516,7 +541,7 @@ class User(BaseModel):
 
 ::: {.column width="33%"}
 
-::: {style="background-color: #fff3e0; padding: 15px; border-radius: 8px;"}
+::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
 **⚠️ Better: `EmailStr`**
 
@@ -537,7 +562,7 @@ class User(BaseModel):
 
 ::: {.column width="33%"}
 
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
 **✅ Best: `AcmeEmailStr`**
 
@@ -565,29 +590,13 @@ class User(BaseModel):
 
 ::::
 
-**Another example: Model temperature constraints**
-
-```{python}
-from pydantic import Field, confloat
-
-class LLMConfig(BaseModel):
-    # Bad: Unclear bounds
-    temperature: float
-
-    # Better: Explicit validation
-    temperature: float = Field(ge=0.0, le=2.0)
-
-    # Best: Self-documenting type
-    temperature: confloat(ge=0.0, le=2.0)  # NonNegativeFloat constrained to [0.0, 2.0]
-```
-
 ### TypeScript (Zod)
 
 :::: {.columns}
 
 ::: {.column width="33%"}
 
-::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
+::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
 **❌ Generic: `string`**
 
@@ -607,7 +616,7 @@ const UserSchema = z.object({
 
 ::: {.column width="33%"}
 
-::: {style="background-color: #fff3e0; padding: 15px; border-radius: 8px;"}
+::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
 **⚠️ Better: `.email()`**
 
@@ -627,7 +636,7 @@ const UserSchema = z.object({
 
 ::: {.column width="33%"}
 
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
 **✅ Best: Custom refinement**
 
@@ -655,25 +664,163 @@ const UserSchema = z.object({
 
 ::::
 
-**Another example: Model temperature constraints**
+:::
 
-```{typescript}
-const LLMConfigSchema = z.object({
-  // Bad: Unclear bounds
-  temperature: z.number(),
-
-  // Better: Explicit validation
-  temperature: z.number().min(0.0).max(2.0),
-
-  // Best: Extracted for reuse
-  temperature: z.number().min(0.0).max(2.0).brand('ModelTemperature'),
-});
-```
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;" .fragment}
+**Progression**: `str` → `EmailStr` → `AcmeEmailStr` = **Increasing specificity = Better readability**
+:::
 
 :::
 
-::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-**Progression**: `str` → `EmailStr` → `AcmeEmailStr` = **Increasing specificity = Better readability**
+## Specific Types Over Generic: Example-2 {.smaller}
+
+Model temperature constraints with increasing specificity.
+
+::: {style="font-size: 0.85em;"}
+
+::: {.panel-tabset}
+
+### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="33%" .fragment}
+
+::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
+
+**❌ Generic: `float`**
+
+```{python}
+class LLMConfig(BaseModel):
+    temperature: float
+```
+
+- Accepts any float
+- No bounds
+- Unclear constraints
+
+:::
+
+:::
+
+::: {.column width="33%" .fragment}
+
+::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
+
+**⚠️ Better: `Field` validation**
+
+```{python}
+from pydantic import Field
+
+class LLMConfig(BaseModel):
+    temperature: float = Field(ge=0.0, le=2.0)
+```
+
+- Explicit validation
+- Bounded range
+- Self-documenting
+
+:::
+
+:::
+
+::: {.column width="33%" .fragment}
+
+::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
+
+**✅ Best: `confloat`**
+
+```{python}
+from pydantic import confloat
+
+class LLMConfig(BaseModel):
+    temperature: confloat(ge=0.0, le=2.0)
+```
+
+- Constrained type
+- Reusable
+- Crystal clear intent
+
+:::
+
+:::
+
+::::
+
+### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="33%" .fragment}
+
+::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
+
+**❌ Generic: `number`**
+
+```{typescript}
+const LLMConfigSchema = z.object({
+  temperature: z.number(),
+});
+```
+
+- Accepts any number
+- No bounds
+- Unclear constraints
+
+:::
+
+:::
+
+::: {.column width="33%" .fragment}
+
+::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
+
+**⚠️ Better: `.min().max()`**
+
+```{typescript}
+const LLMConfigSchema = z.object({
+  temperature: z.number().min(0.0).max(2.0),
+});
+```
+
+- Explicit validation
+- Bounded range
+- Self-documenting
+
+:::
+
+:::
+
+::: {.column width="33%" .fragment}
+
+::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
+
+**✅ Best: `.brand()`**
+
+```{typescript}
+const LLMConfigSchema = z.object({
+  temperature: z.number()
+    .min(0.0).max(2.0)
+    .brand('ModelTemperature'),
+});
+```
+
+- Branded type
+- Reusable
+- Crystal clear intent
+
+:::
+
+:::
+
+::::
+
+:::
+
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;" .fragment}
+**Progression**: `float` → `Field(ge, le)` → `confloat` = **Increasing specificity = Better constraints**
+:::
+
 :::
 
 # Runtime Behavior
@@ -682,7 +829,7 @@ const LLMConfigSchema = z.object({
 
 ## Automatic Validation {.smaller}
 
-Data is validated as it enters your system, catching errors early before they propagate.
+Data validated as it enters the system, catching errors early.
 
 . . .
 
@@ -752,7 +899,7 @@ try {
 
 ## Data Coercion & Parsing {.smaller}
 
-Automatically converts compatible types following sensible rules.
+Automatic conversion of compatible types following sensible rules.
 
 . . .
 
@@ -818,7 +965,7 @@ console.log(event.attendees);  // ["Alice", "Bob"]
 
 ## Detailed Error Messages {.smaller}
 
-Provides specific, actionable feedback about what's wrong and where.
+Specific, actionable feedback about what's wrong and where.
 
 . . .
 
@@ -903,7 +1050,7 @@ if (!result.success) {
 
 ## Type Inference {.smaller}
 
-TypeScript/Python types are automatically derived from your schemas—no duplicate type definitions needed.
+Types automatically derived from schemas—no duplicate type definitions needed.
 
 . . .
 
@@ -989,7 +1136,7 @@ const city: string = getPersonCity(person);
 
 ## End-to-End Type Safety {.smaller}
 
-Ensures runtime data actually matches your static types, bridging the gap between type systems and reality.
+Runtime data matches static types—bridges the gap between type systems and reality.
 
 . . .
 
@@ -1076,7 +1223,7 @@ processResponse(response);
 
 ## Eliminates Type/Validation Drift {.smaller}
 
-When you update the schema, types automatically update—impossible for them to become out of sync.
+Schema updates automatically update types—impossible to become out of sync.
 
 . . .
 
@@ -1171,7 +1318,7 @@ function oldProcessUser(user: UserV2): string {
 
 ## Reduced Test Burden {.smaller}
 
-Don't need to write as many validation tests since the library handles edge cases.
+Library handles edge cases—fewer validation tests needed.
 
 . . .
 
@@ -1350,7 +1497,7 @@ describe("User permissions", () => {
 
 ## Easy Mock Data Generation {.smaller}
 
-Many libraries offer utilities to generate valid test data from schemas.
+Generate valid test data from schemas.
 
 . . .
 
@@ -1441,7 +1588,7 @@ describe("Product operations", () => {
 
 ## Contract Testing {.smaller}
 
-Schemas can be shared between frontend/backend or services to ensure compatibility.
+Shared schemas between frontend/backend ensure compatibility.
 
 . . .
 
@@ -1530,7 +1677,7 @@ console.log(user.created_at);  // TypeScript knows this is Date
 
 ## Input Sanitization {.smaller}
 
-Strips unknown/dangerous fields automatically, preventing mass assignment vulnerabilities.
+Strips unknown/dangerous fields automatically—prevents mass assignment vulnerabilities.
 
 . . .
 
@@ -1622,7 +1769,7 @@ const userUpdate = UserUpdateSchema.parse(safeData);
 
 ## Type Confusion Prevention {.smaller}
 
-Ensures attackers can't exploit loose type coercion in JavaScript/Python.
+Prevents exploitation of loose type coercion in JavaScript/Python.
 
 . . .
 
@@ -1712,7 +1859,7 @@ if (!result2.success) {
 
 ## Size & Range Limits {.smaller}
 
-Enforce constraints on string lengths, number ranges, array sizes to prevent DoS attacks.
+Constraints on string lengths, number ranges, array sizes prevent DoS attacks.
 
 . . .
 
@@ -1800,7 +1947,7 @@ if (!result.success) {
 
 ## API Design & Documentation {.smaller}
 
-Auto-generate OpenAPI/Swagger specs directly from schemas, ensuring docs stay synchronized.
+Auto-generate OpenAPI/Swagger specs from schemas—docs stay synchronized.
 
 . . .
 
@@ -1897,7 +2044,7 @@ const openApiSchema = generateSchema(UserSchema);
 
 ## Data Transformation {.smaller}
 
-Built-in serialization/deserialization (e.g., date parsing, nested object handling).
+Built-in serialization/deserialization—date parsing, nested object handling.
 
 . . .
 
@@ -1997,7 +2144,7 @@ console.log(JSON.stringify(post));
 
 ## Immutable Configs: Validate Once, Done {.smaller}
 
-For data that shouldn't change after creation, use frozen/immutable models to validate once and guarantee immutability.
+Frozen/immutable models validate once and guarantee immutability.
 
 . . .
 
@@ -2102,7 +2249,7 @@ function connectDb() {
 
 ## Developer Experience {.smaller}
 
-Reduces boilerplate and improves onboarding with cross-language consistency.
+Reduces boilerplate—cross-language consistency improves onboarding.
 
 . . .
 
