@@ -856,7 +856,7 @@ valid_product = ProductPrice(
 try:
     invalid_product = ProductPrice(
         product_id="PROD-123",
-        price=-10,  # Negative price!
+        price=-10,     # Negative price!
         currency="US"  # Invalid currency format!
     )
 except ValidationError as e:
@@ -912,20 +912,20 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class Event(BaseModel):
-    event_id: int  # Coerces string to int if valid
+    event_id: int        # Coerces string to int if valid
     timestamp: datetime  # Parses ISO 8601 strings
-    is_public: bool  # Coerces "true", "1", "yes" to True
-    attendees: list[str]  # Coerces tuple to list
+    is_public: bool      # Coerces "true", "1", "yes" to True
+    attendees: list[str] # Coerces tuple to list
 
 # String inputs are intelligently coerced
 event = Event(
-    event_id="42",  # String "42" → int 42
+    event_id="42",                    # String "42" → int 42
     timestamp="2024-01-15T10:30:00",  # String → datetime
-    is_public="yes",  # String "yes" → bool True
-    attendees=("Alice", "Bob")  # Tuple → list
+    is_public="yes",                  # String "yes" → bool True
+    attendees=("Alice", "Bob")        # Tuple → list
 )
 
-print(event.event_id)  # 42 (int)
+print(event.event_id)   # 42 (int)
 print(event.timestamp)  # datetime object
 print(event.is_public)  # True (bool)
 print(event.attendees)  # ["Alice", "Bob"] (list)
@@ -937,23 +937,23 @@ print(event.attendees)  # ["Alice", "Bob"] (list)
 import { z } from "zod";
 
 const EventSchema = z.object({
-  eventId: z.coerce.number(),  // Coerces string to number
-  timestamp: z.coerce.date(),  // Parses ISO strings to Date
+  eventId: z.coerce.number(),   // Coerces string to number
+  timestamp: z.coerce.date(),   // Parses ISO strings to Date
   isPublic: z.boolean(),
   attendees: z.array(z.string()),
 });
 
 // String inputs are intelligently coerced
 const event = EventSchema.parse({
-  eventId: "42",  // String "42" → number 42
+  eventId: "42",                     // String "42" → number 42
   timestamp: "2024-01-15T10:30:00",  // String → Date
   isPublic: true,
   attendees: ["Alice", "Bob"],
 });
 
-console.log(event.eventId);  // 42 (number)
+console.log(event.eventId);    // 42 (number)
 console.log(event.timestamp);  // Date object
-console.log(event.isPublic);  // true (boolean)
+console.log(event.isPublic);   // true (boolean)
 console.log(event.attendees);  // ["Alice", "Bob"]
 ```
 
@@ -984,10 +984,10 @@ class SignupForm(BaseModel):
 
 try:
     user = SignupForm(
-        username="ab",  # Too short
-        email="not-an-email",  # Invalid format
-        age=10,  # Too young
-        password="short"  # Too short
+        username="ab",            # Too short
+        email="not-an-email",     # Invalid format
+        age=10,                   # Too young
+        password="short"          # Too short
     )
 except ValidationError as e:
     print(e.json(indent=2))
@@ -1020,10 +1020,10 @@ const SignupFormSchema = z.object({
 });
 
 const result = SignupFormSchema.safeParse({
-  username: "ab",  // Too short
-  email: "not-an-email",  // Invalid format
-  age: 10,  // Too young
-  password: "short"  // Too short
+  username: "ab",            // Too short
+  email: "not-an-email",     // Invalid format
+  age: 10,                   // Too young
+  password: "short"          // Too short
 });
 
 if (!result.success) {
@@ -1244,7 +1244,7 @@ class UserV1(BaseModel):
 class UserV2(BaseModel):
     name: str
     role: Literal["user", "admin", "moderator"]  # Added "moderator"
-    email: str  # Added required email field
+    email: str                                   # Added required email field
 
 # Type checkers immediately catch outdated code
 def process_user(user: UserV2) -> str:
@@ -1279,7 +1279,7 @@ const UserV1Schema = z.object({
 const UserV2Schema = z.object({
   name: z.string(),
   role: z.enum(["user", "admin", "moderator"]),  // Added "moderator"
-  email: z.string(),  // Added required email field
+  email: z.string(),                             // Added required email field
 });
 
 type UserV2 = z.infer<typeof UserV2Schema>;
@@ -2082,13 +2082,13 @@ class BlogPost(BaseModel):
 raw_data = {
     "title": "My Blog Post",
     "published_at": "2024-01-15T10:30:00Z",  # String → datetime
-    "tags": "python,fastapi,pydantic",  # Can use custom parser
+    "tags": "python,fastapi,pydantic",       # Can use custom parser
 }
 
 post = BlogPost(
     title="My Blog Post",
-    slug="",  # Auto-generated from title
-    published_at="2024-01-15T10:30:00",  # String → datetime object
+    slug="",                              # Auto-generated from title
+    published_at="2024-01-15T10:30:00",   # String → datetime object
     tags=["python", "fastapi", "pydantic"]
 )
 
@@ -2186,8 +2186,8 @@ except ValidationError as e:
 def connect_db():
     # No need to re-validate - guaranteed correct
     connection = psycopg2.connect(
-        host=db_config.host,  # Always valid
-        port=db_config.port,  # Always in range 1-65535
+        host=db_config.host,      # Always valid
+        port=db_config.port,      # Always in range 1-65535
         database=db_config.database
     )
 ```
@@ -2224,8 +2224,8 @@ const dbConfig = DatabaseConfigSchema.parse({
 function connectDb() {
   // No need to re-validate - guaranteed correct
   const connection = createConnection({
-    host: dbConfig.host,  // Always valid
-    port: dbConfig.port,  // Always in range 1-65535
+    host: dbConfig.host,      // Always valid
+    port: dbConfig.port,      // Always in range 1-65535
     database: dbConfig.database,
   });
 }
