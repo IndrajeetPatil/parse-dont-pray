@@ -312,7 +312,7 @@ The schema **is** the documentation—no separate docs needed!
 ### Python (Pydantic)
 
 ```{python}
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from uuid import UUID
 
@@ -324,7 +324,8 @@ class Order(BaseModel):
     created_at: datetime
     items: list[str] = Field(min_length=1)
 
-    @validator('order_id')
+    @field_validator('order_id')
+    @classmethod
     def validate_order_id(cls, value):
         if not value.startswith('ORD-'):
             raise ValueError('Order ID must start with ORD-')
@@ -349,13 +350,13 @@ Schema definition, validation logic, and type information in one place.
 ```{typescript}
 import { z } from "zod";
 
-const OrderSchema = z.object({
+const OrderSchema = z.strictObject({
   orderId: z.string().startsWith("ORD-"),
   customerId: z.string().uuid(),
   totalAmount: z.number().positive(),
   createdAt: z.date(),
   items: z.array(z.string()).min(1),
-}).strict();
+});
 
 type Order = z.infer<typeof OrderSchema>;
 
@@ -1541,9 +1542,9 @@ user_update = UserUpdate(**safe_data)
 ```{typescript}
 import { z } from "zod";
 
-const UserUpdateSchema = z.object({
+const UserUpdateSchema = z.strictObject({
   email: z.string().email(),
-}).strict();  // Reject unknown fields
+});  // Reject unknown fields
 
 // Malicious request trying to escalate privileges
 const maliciousData = {
@@ -1673,7 +1674,7 @@ Constraints on string lengths, number ranges, array sizes prevent DoS attacks.
 ### Python (Pydantic)
 
 ```{python}
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 class CommentSubmission(BaseModel):
     """Constrained inputs prevent resource exhaustion."""
@@ -1683,7 +1684,8 @@ class CommentSubmission(BaseModel):
     tags: list[str] = Field(max_length=10)
     rating: int = Field(ge=1, le=5)
 
-    @validator('tags')
+    @field_validator('tags')
+    @classmethod
     def validate_tag_length(cls, tags):
         if any(len(tag) > 30 for tag in tags):
             raise ValueError('Tag too long')
@@ -1859,31 +1861,29 @@ Built-in serialization/deserialization—date parsing, nested object handling.
 ### Python (Pydantic)
 
 ```{python}
-from pydantic import BaseModel, Field, validator, ConfigDict
+from pydantic import BaseModel, Field, model_validator, field_serializer
 from datetime import datetime
-from typing import Optional
 
 class BlogPost(BaseModel):
     """Automatic transformation of complex data types."""
-    model_config = ConfigDict(
-        # Serialize datetime as ISO string in JSON
-        json_encoders={
-            datetime: lambda value: value.isoformat()
-        }
-    )
-
     title: str
     slug: str
     published_at: datetime  # Auto-parses ISO strings
     tags: list[str]
     view_count: int = 0
 
-    @validator('slug', pre=True, always=True)
-    def generate_slug(cls, value, values):
+    @model_validator(mode='before')
+    @classmethod
+    def generate_slug(cls, values):
         """Auto-generate slug from title if not provided."""
-        if not value and 'title' in values:
-            return values['title'].lower().replace(' ', '-')
-        return value
+        if not values.get('slug') and 'title' in values:
+            values['slug'] = values['title'].lower().replace(' ', '-')
+        return values
+
+    @field_serializer('published_at')
+    def serialize_datetime(self, value: datetime) -> str:
+        """Serialize datetime as ISO string in JSON."""
+        return value.isoformat()
 
 # Input with various formats
 raw_data = {
