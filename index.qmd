@@ -136,7 +136,7 @@ def greet(name: str) -> str:
     return f"Hello, {name}!"
 
 # Runs fine, even with wrong type
-greet(42)  # "Hello, 42!"
+greet(42)          # "Hello, 42!"
 # Type error only if you use string methods
 greet(42).upper()  # Runtime error!
 ```
@@ -152,7 +152,8 @@ greet(42).upper()  # Runtime error!
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; font-size: 0.9em;"}
 
-**Why validation matters more for dynamic languages**: Without compile-time checks, you need **runtime validation** to ensure data integrity. Validation libraries bridge this gap!
+**Why validation matters more for dynamic languages**: <br>
+Without compile-time checks, **runtime validation** ensures data integrity.
 
 :::
 
@@ -198,6 +199,7 @@ Schemas automatically validate, parse, and type data:
 - Automatic type coercion
 - Detailed error messages
 - Runtime type safety
+- Easier to maintain and evolve
 
 :::
 
@@ -211,9 +213,9 @@ Schemas automatically validate, parse, and type data:
 
 ::: {.column width="50%" .fragment}
 
-::: {style="background-color: #ffffff; border: 2px solid #E92063; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85em;"}
+::: {style="background-color: #ffffff; border: 2px solid #E92063; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85em; text-align: center;"}
 
-::: {style="text-align: center; margin-bottom: 15px;"}
+::: {style="height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;"}
 ![](media/pydantic-logo.png){width="100px" fig-alt="Pydantic logo"}
 :::
 
@@ -221,12 +223,9 @@ Schemas automatically validate, parse, and type data:
 **Pydantic** (Python)
 :::
 
-- Runtime data validation using Python type hints
-- Automatic type coercion and parsing
-- Integration with FastAPI, SQLModel, and more
-- JSON Schema generation
+Runtime data validation using Python type annotations
 
-::: {style="text-align: center; margin-top: 10px; font-size: 0.95em;"}
+::: {style="margin-top: 10px; font-size: 0.95em;"}
 [docs.pydantic.dev](https://docs.pydantic.dev/latest/)
 :::
 
@@ -236,9 +235,9 @@ Schemas automatically validate, parse, and type data:
 
 ::: {.column width="50%" .fragment}
 
-::: {style="background-color: #ffffff; border: 2px solid #3E67B1; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85em;"}
+::: {style="background-color: #ffffff; border: 2px solid #3E67B1; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.85em; text-align: center;"}
 
-::: {style="text-align: center; margin-bottom: 15px;"}
+::: {style="height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;"}
 ![](media/zod-logo.webp){width="100px" fig-alt="Zod logo"}
 :::
 
@@ -246,13 +245,9 @@ Schemas automatically validate, parse, and type data:
 **Zod** (TypeScript)
 :::
 
-- TypeScript-first schema validation
-- Zero dependencies, works in all JS environments
-- Type inference from schemas
-- Composable schema design
-- Async validation support
+TypeScript-first schema validation with type inference
 
-::: {style="text-align: center; margin-top: 10px; font-size: 0.95em;"}
+::: {style="margin-top: 10px; font-size: 0.95em;"}
 [zod.dev](https://zod.dev/)
 :::
 
@@ -272,10 +267,6 @@ Schemas automatically validate, parse, and type data:
 
 ## Self-Documenting Schemas {.smaller}
 
-Validation rules serve as inline documentation.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
@@ -285,7 +276,6 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Literal
 
 class UserProfile(BaseModel):
-    """User profile with built-in validation."""
     username: str = Field(min_length=3, max_length=20)
     email: EmailStr
     age: int = Field(ge=18, le=120)
@@ -317,10 +307,6 @@ The schema **is** the documentation—no separate docs needed!
 
 ## Single Source of Truth {.smaller}
 
-Schema definition, validation logic, and type information in one place.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
@@ -328,30 +314,35 @@ Schema definition, validation logic, and type information in one place.
 ```{python}
 from pydantic import BaseModel, validator
 from datetime import datetime
+from uuid import UUID
 
 class Order(BaseModel):
     """Single source for order structure, validation, and types."""
     order_id: str
-    customer_id: str
+    customer_id: UUID
     total_amount: float = Field(gt=0)
     created_at: datetime
     items: list[str] = Field(min_length=1)
 
     @validator('order_id')
-    def validate_order_id(cls, v):
-        if not v.startswith('ORD-'):
+    def validate_order_id(cls, value):
+        if not value.startswith('ORD-'):
             raise ValueError('Order ID must start with ORD-')
-        return v
+        return value
 
 # Type hints, validation, and structure all in one place
 order = Order(
     order_id="ORD-123",
-    customer_id="CUST-456",
+    customer_id="550e8400-e29b-41d4-a716-446655440000",
     total_amount=99.99,
     created_at=datetime.now(),
     items=["item1", "item2"]
 )
 ```
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+Schema definition, validation logic, and type information in one place.
+:::
 
 ### TypeScript (Zod)
 
@@ -360,7 +351,7 @@ import { z } from "zod";
 
 const OrderSchema = z.object({
   orderId: z.string().startsWith("ORD-"),
-  customerId: z.string(),
+  customerId: z.string().uuid(),
   totalAmount: z.number().positive(),
   createdAt: z.date(),
   items: z.array(z.string()).min(1),
@@ -371,7 +362,7 @@ type Order = z.infer<typeof OrderSchema>;
 // Type, validation, and structure all in one place
 const order = OrderSchema.parse({
   orderId: "ORD-123",
-  customerId: "CUST-456",
+  customerId: "550e8400-e29b-41d4-a716-446655440000",
   totalAmount: 99.99,
   createdAt: new Date(),
   items: ["item1", "item2"],
@@ -508,7 +499,7 @@ type User = z.infer<typeof UserSchema>;
 **Result**: Reduced cognitive load—focus on business logic, not validation boilerplate!
 :::
 
-## Specific Types Over Generic: Example-1 {.smaller}
+## Specific Types Over Generic {.smaller}
 
 Specific, domain-appropriate types improve readability and catch errors early.
 
@@ -571,10 +562,10 @@ from pydantic import field_validator
 
 class AcmeEmailStr(EmailStr):
     @field_validator('email')
-    def must_be_acme(cls, v):
-        if not v.endswith('@acme.com'):
+    def must_be_acme(cls, value):
+        if not value.endswith('@acme.com'):
             raise ValueError('Must be @acme.com')
-        return v
+        return value
 
 class User(BaseModel):
     email: AcmeEmailStr
@@ -668,157 +659,6 @@ const UserSchema = z.object({
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 **Progression**: `str` → `EmailStr` → `AcmeEmailStr` = **Increasing specificity = Better readability**
-:::
-
-:::
-
-## Specific Types Over Generic: Example-2 {.smaller}
-
-Model temperature constraints with increasing specificity.
-
-::: {style="font-size: 0.85em;"}
-
-::: {.panel-tabset}
-
-### Python (Pydantic)
-
-:::: {.columns}
-
-::: {.column width="24%"}
-
-::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
-
-**❌ Generic: `float`**
-
-```{python}
-class LLMConfig(BaseModel):
-    temperature: float
-```
-
-- Accepts any float
-- No bounds
-- Unclear constraints
-
-:::
-
-:::
-
-::: {.column width="38%"}
-
-::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
-
-**⚠️ Better: `Field` validation**
-
-```{python}
-from pydantic import Field
-
-class LLMConfig(BaseModel):
-    temperature: float = Field(ge=0.0, le=2.0)
-```
-
-- Explicit validation
-- Bounded range
-- Self-documenting
-
-:::
-
-:::
-
-::: {.column width="38%"}
-
-::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
-
-**✅ Best: `confloat`**
-
-```{python}
-from pydantic import confloat
-
-class LLMConfig(BaseModel):
-    temperature: confloat(ge=0.0, le=2.0)
-```
-
-- Constrained type
-- Reusable
-- Crystal clear intent
-
-:::
-
-:::
-
-::::
-
-### TypeScript (Zod)
-
-:::: {.columns}
-
-::: {.column width="24%"}
-
-::: {style="background-color: #ffebee; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
-
-**❌ Generic: `number`**
-
-```{typescript}
-const LLMConfigSchema = z.object({
-  temperature: z.number(),
-});
-```
-
-- Accepts any number
-- No bounds
-- Unclear constraints
-
-:::
-
-:::
-
-::: {.column width="38%"}
-
-::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
-
-**⚠️ Better: `.min().max()`**
-
-```{typescript}
-const LLMConfigSchema = z.object({
-  temperature: z.number().min(0.0).max(2.0),
-});
-```
-
-- Explicit validation
-- Bounded range
-- Self-documenting
-
-:::
-
-:::
-
-::: {.column width="38%"}
-
-::: {style="background-color: #e8f5e9; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
-
-**✅ Best: `.brand()`**
-
-```{typescript}
-const LLMConfigSchema = z.object({
-  temperature: z.number()
-    .min(0.0).max(2.0)
-    .brand('ModelTemperature'),
-});
-```
-
-- Branded type
-- Reusable
-- Crystal clear intent
-
-:::
-
-:::
-
-::::
-
-:::
-
-::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-**Progression**: `float` → `Field(ge, le)` → `confloat` = **Increasing specificity = Better constraints**
 :::
 
 :::
@@ -2066,16 +1906,16 @@ class BlogPost(BaseModel):
     view_count: int = 0
 
     @validator('slug', pre=True, always=True)
-    def generate_slug(cls, v, values):
+    def generate_slug(cls, value, values):
         """Auto-generate slug from title if not provided."""
-        if not v and 'title' in values:
+        if not value and 'title' in values:
             return values['title'].lower().replace(' ', '-')
-        return v
+        return value
 
     class Config:
         # Serialize datetime as ISO string in JSON
         json_encoders = {
-            datetime: lambda v: v.isoformat()
+            datetime: lambda value: value.isoformat()
         }
 
 # Input with various formats
