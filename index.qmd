@@ -41,12 +41,12 @@ knitr::opts_chunk$set(eval = FALSE)
 Parse, Don't Pray: The Case for Data Validation
 :::
 
-::: {style="font-size: 0.9em; margin-bottom: 1em;"}
+::: {style="font-size: 0.9em; margin-bottom: 0.1em;"}
 Indrajeet Patil
 :::
 
-::: {style="display: flex; justify-content: center;"}
-![](media/social-media-card.jpg){width="70%" fig-alt="Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"}
+::: {style="display: flex; justify-content: center; margin-top: 0.2em;"}
+![](media/social-media-card.jpg){width="85%" style="max-height: 400px; object-fit: contain;" fig-alt="Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"}
 :::
 
 :::
@@ -311,6 +311,12 @@ The schema **is** the documentation—no separate docs needed!
 
 ### Python (Pydantic)
 
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
+
 ```{python}
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
@@ -329,8 +335,16 @@ class Order(BaseModel):
         if not value.startswith('ORD-'):
             raise ValueError('Order ID must start with ORD-')
         return value
+```
 
-# Type hints, validation, and structure all in one place
+:::
+
+::: {.column width="50%"}
+
+**Usage Example**
+
+```{python}
+# Create an order instance
 order = Order(
     order_id="ORD-123",
     customer_id="550e8400-e29b-41d4-a716-446655440000",
@@ -340,11 +354,21 @@ order = Order(
 )
 ```
 
+:::
+
+::::
+
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 Schema definition, validation logic, and type information in one place.
 :::
 
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -358,8 +382,16 @@ const OrderSchema = z.strictObject({
 });
 
 type Order = z.infer<typeof OrderSchema>;
+```
 
-// Type, validation, and structure all in one place
+:::
+
+::: {.column width="50%"}
+
+**Usage Example**
+
+```{typescript}
+// Create an order instance
 const order = OrderSchema.parse({
   orderId: "ORD-123",
   customerId: "550e8400-e29b-41d4-a716-446655440000",
@@ -368,6 +400,10 @@ const order = OrderSchema.parse({
   items: ["item1", "item2"],
 });
 ```
+
+:::
+
+::::
 
 :::
 
@@ -496,8 +532,6 @@ Describes *what* the data should look like, not *how* to validate it.
 :::
 
 ## Specific Types Over Generic {.smaller}
-
-Specific, domain-appropriate types improve readability and catch errors early.
 
 ::: {style="font-size: 0.85em;"}
 
@@ -669,6 +703,12 @@ const UserSchema = z.object({
 
 ### Python (Pydantic)
 
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
+
 ```{python}
 from pydantic import BaseModel, ValidationError, Field
 
@@ -676,7 +716,15 @@ class ProductPrice(BaseModel):
     product_id: str
     price: float = Field(gt=0)
     currency: str = Field(pattern=r'^[A-Z]{3}$')
+```
 
+:::
+
+::: {.column width="50%"}
+
+**Validation Examples**
+
+```{python}
 # Valid data passes through
 valid_product = ProductPrice(
     product_id="PROD-123",
@@ -684,19 +732,28 @@ valid_product = ProductPrice(
     currency="USD"
 )
 
-# Invalid data raises detailed error immediately
+# Invalid data raises detailed error
 try:
     invalid_product = ProductPrice(
         product_id="PROD-123",
-        price=-10,     # Negative price!
-        currency="US"  # Invalid currency format!
+        price=-10,     # Negative!
+        currency="US"  # Invalid format!
     )
 except ValidationError as e:
     print(e.json())
-    # Shows exactly what's wrong and where
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -706,7 +763,15 @@ const ProductPriceSchema = z.object({
   price: z.number().positive(),
   currency: z.string().regex(/^[A-Z]{3}$/),
 });
+```
 
+:::
+
+::: {.column width="50%"}
+
+**Validation Examples**
+
+```{typescript}
 // Valid data passes through
 const validProduct = ProductPriceSchema.parse({
   productId: "PROD-123",
@@ -714,18 +779,21 @@ const validProduct = ProductPriceSchema.parse({
   currency: "USD",
 });
 
-// Invalid data throws detailed error immediately
+// Invalid data throws detailed error
 try {
   const invalidProduct = ProductPriceSchema.parse({
     productId: "PROD-123",
-    price: -10,     // Negative price!
-    currency: "US", // Invalid currency format!
+    price: -10,     // Negative!
+    currency: "US", // Invalid format!
   });
 } catch (error) {
   console.error(error.errors);
-  // Shows exactly what's wrong and where
 }
 ```
+
+:::
+
+::::
 
 :::
 
@@ -735,54 +803,82 @@ Data validated as it enters the system, catching errors early.
 
 ## Data Coercion & Parsing {.smaller}
 
-Automatic conversion of compatible types following sensible rules.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 from pydantic import BaseModel
 from datetime import datetime
 
 class Event(BaseModel):
-    event_id: int        # Coerces string to int if valid
+    event_id: int        # Coerces string to int
     timestamp: datetime  # Parses ISO 8601 strings
-    is_public: bool      # Coerces "true", "1", "yes" to True
+    is_public: bool      # Coerces to bool
     attendees: list[str] # Coerces tuple to list
+```
 
+:::
+
+::: {.column width="50%"}
+
+**Coercion Examples**
+
+```{python}
 # String inputs are intelligently coerced
 event = Event(
-    event_id="42",                    # String "42" → int 42
-    timestamp="2024-01-15T10:30:00",  # String → datetime
-    is_public="yes",                  # String "yes" → bool True
-    attendees=("Alice", "Bob")        # Tuple → list
+    event_id="42",                    # → int 42
+    timestamp="2024-01-15T10:30:00",  # → datetime
+    is_public="yes",                  # → True
+    attendees=("Alice", "Bob")        # → list
 )
 
 print(event.event_id)   # 42 (int)
 print(event.timestamp)  # datetime object
 print(event.is_public)  # True (bool)
-print(event.attendees)  # ["Alice", "Bob"] (list)
+print(event.attendees)  # ["Alice", "Bob"]
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
 
 const EventSchema = z.object({
-  eventId: z.coerce.number(),   // Coerces string to number
-  timestamp: z.coerce.date(),   // Parses ISO strings to Date
+  eventId: z.coerce.number(),   // Coerce to number
+  timestamp: z.coerce.date(),   // Parse to Date
   isPublic: z.boolean(),
   attendees: z.array(z.string()),
 });
+```
 
+:::
+
+::: {.column width="50%"}
+
+**Coercion Examples**
+
+```{typescript}
 // String inputs are intelligently coerced
 const event = EventSchema.parse({
-  eventId: "42",                     // String "42" → number 42
-  timestamp: "2024-01-15T10:30:00",  // String → Date
+  eventId: "42",                     // → number 42
+  timestamp: "2024-01-15T10:30:00",  // → Date
   isPublic: true,
   attendees: ["Alice", "Bob"],
 });
@@ -792,6 +888,10 @@ console.log(event.timestamp);  // Date object
 console.log(event.isPublic);   // true (boolean)
 console.log(event.attendees);  // ["Alice", "Bob"]
 ```
+
+:::
+
+::::
 
 :::
 
@@ -805,13 +905,27 @@ console.log(event.attendees);  // ["Alice", "Bob"]
 
 ### Python (Pydantic)
 
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
+
 ```{python}
 from pydantic import BaseModel, ValidationError, EmailStr, Field
 
 class SignupForm(BaseModel):
     username: str = Field(min_length=3)
     email: EmailStr
+```
 
+:::
+
+::: {.column width="50%"}
+
+**Error Messages**
+
+```{python}
 try:
     user = SignupForm(
         username="ab",        # Too short
@@ -820,21 +934,27 @@ try:
 except ValidationError as e:
     print(e.json(indent=2))
     # Output:
-    # [
-    #   {
-    #     "loc": ["username"],
-    #     "msg": "ensure this value has at least 3 characters",
-    #     "type": "value_error.any_str.min_length"
-    #   },
-    #   {
-    #     "loc": ["email"],
-    #     "msg": "value is not a valid email address",
-    #     "type": "value_error.email"
-    #   }
-    # ]
+    # [{
+    #   "loc": ["username"],
+    #   "msg": "at least 3 characters",
+    #  },
+    #  {
+    #   "loc": ["email"],
+    #   "msg": "not a valid email",
+    # }]
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -843,21 +963,35 @@ const SignupFormSchema = z.object({
   username: z.string().min(3),
   email: z.string().email(),
 });
+```
 
+:::
+
+::: {.column width="50%"}
+
+**Error Messages**
+
+```{typescript}
 const result = SignupFormSchema.safeParse({
   username: "ab",            // Too short
   email: "not-an-email",     // Invalid format
 });
 
 if (!result.success) {
-  console.log(JSON.stringify(result.error.format(), null, 2));
+  console.log(result.error.format());
   // Output:
   // {
-  //   "username": { "_errors": ["String must contain at least 3 character(s)"] },
+  //   "username": {
+  //     "_errors": ["at least 3 character(s)"]
+  //   },
   //   "email": { "_errors": ["Invalid email"] }
   // }
 }
 ```
+
+:::
+
+::::
 
 :::
 
@@ -871,13 +1005,15 @@ Specific, actionable feedback about what's wrong and where.
 
 ## Type Inference {.smaller}
 
-Types automatically derived from schemas—no duplicate type definitions needed.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 from pydantic import BaseModel
@@ -887,31 +1023,51 @@ class Address(BaseModel):
     street: str
     city: str
     zipcode: str
-    country: str = "USA"  # Default value
+    country: str = "USA"
 
 class Person(BaseModel):
     name: str
     age: int
     address: Address
     phone: Optional[str] = None
+```
 
-# Type checkers (mypy, pyright) understand these types automatically
+:::
+
+::: {.column width="50%"}
+
+**Type Inference**
+
+```{python}
+# Type checkers understand types automatically
 def get_person_city(person: Person) -> str:
-    # IDE autocomplete works perfectly
     return person.address.city
 
-# No need to write separate type annotations
+# No separate type annotations needed
 person = Person(
     name="Alice",
     age=30,
-    address=Address(street="123 Main St", city="Boston", zipcode="02101")
+    address=Address(
+        street="123 Main St",
+        city="Boston",
+        zipcode="02101"
+    )
 )
 
-# Type checker knows this is str
 city: str = get_person_city(person)
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -929,25 +1085,38 @@ const PersonSchema = z.object({
   address: AddressSchema,
   phone: z.string().optional(),
 });
+```
 
-// Type automatically inferred from schema
+:::
+
+::: {.column width="50%"}
+
+**Type Inference**
+
+```{typescript}
+// Types automatically inferred from schema
 type Person = z.infer<typeof PersonSchema>;
-type Address = z.infer<typeof AddressSchema>;
 
-// TypeScript knows all these types
 function getPersonCity(person: Person): string {
-  // Full autocomplete and type checking
   return person.address.city;
 }
 
 const person = PersonSchema.parse({
   name: "Alice",
   age: 30,
-  address: { street: "123 Main St", city: "Boston", zipcode: "02101" }
+  address: {
+    street: "123 Main St",
+    city: "Boston",
+    zipcode: "02101"
+  }
 });
 
 const city: string = getPersonCity(person);
 ```
+
+:::
+
+::::
 
 :::
 
@@ -957,13 +1126,15 @@ const city: string = getPersonCity(person);
 
 ## End-to-End Type Safety {.smaller}
 
-Runtime data matches static types—bridges the gap between type systems and reality.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 from pydantic import BaseModel, Field
@@ -973,29 +1144,43 @@ class ApiResponse(BaseModel):
     status: str = Field(pattern=r'^(success|error)$')
     data: List[dict]
     message: str
+```
 
+:::
+
+::: {.column width="50%"}
+
+**Type-Safe Usage**
+
+```{python}
 def fetch_data_from_api() -> ApiResponse:
-    # External API call (runtime data!)
-    raw_response = requests.get("https://api.example.com/data").json()
-
-    # Validate that runtime data matches expected structure
-    # If API returns unexpected data, this catches it!
+    raw_response = requests.get(
+        "https://api.example.com/data"
+    ).json()
+    # Validates runtime data
     return ApiResponse(**raw_response)
 
-# Type safety from API boundary through entire app
 def process_response(response: ApiResponse) -> None:
-    # Type checker guarantees response.status exists and is a string
-    # Pydantic guarantees it's actually "success" or "error" at runtime
+    # Type-safe throughout
     if response.status == "success":
-        for item in response.data:  # Type checker knows this is List[dict]
+        for item in response.data:
             process_item(item)
 
-# Runtime validation + static type checking = confidence!
 response = fetch_data_from_api()
 process_response(response)
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -1007,32 +1192,37 @@ const ApiResponseSchema = z.object({
 });
 
 type ApiResponse = z.infer<typeof ApiResponseSchema>;
+```
 
+:::
+
+::: {.column width="50%"}
+
+**Type-Safe Usage**
+
+```{typescript}
 async function fetchDataFromApi(): Promise<ApiResponse> {
-  // External API call (runtime data!)
-  const rawResponse = await fetch("https://api.example.com/data");
+  const rawResponse = await fetch(
+    "https://api.example.com/data"
+  );
   const json = await rawResponse.json();
-
-  // Validate that runtime data matches expected structure
-  // If API returns unexpected data, this catches it!
+  // Validates runtime data
   return ApiResponseSchema.parse(json);
 }
 
-// Type safety from API boundary through entire app
 function processResponse(response: ApiResponse): void {
-  // TypeScript knows response.status exists and is a string
-  // Zod guarantees it's actually "success" or "error" at runtime
+  // Type-safe throughout
   if (response.status === "success") {
     for (const item of response.data) {
       processItem(item);
     }
   }
 }
-
-// Runtime validation + static type checking = confidence!
-const response = await fetchDataFromApi();
-processResponse(response);
 ```
+
+:::
+
+::::
 
 :::
 
@@ -1042,13 +1232,15 @@ processResponse(response);
 
 ## Eliminates Type/Validation Drift {.smaller}
 
-Schema updates automatically update types—impossible to become out of sync.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Evolution**
 
 ```{python}
 from pydantic import BaseModel, Field
@@ -1059,31 +1251,48 @@ class UserV1(BaseModel):
     name: str
     role: Literal["user", "admin"]
 
-# Version 2: Add new role, change field
+# Version 2: Updated schema
 class UserV2(BaseModel):
     name: str
-    role: Literal["user", "admin", "moderator"]  # Added "moderator"
-    email: str                                   # Added required email field
+    role: Literal["user", "admin", "moderator"]
+    email: str  # New required field
+```
 
-# Type checkers immediately catch outdated code
+:::
+
+::: {.column width="50%"}
+
+**Type-Checked Usage**
+
+```{python}
+# Types automatically update
 def process_user(user: UserV2) -> str:
-    # IDE autocomplete shows all three roles
-    if user.role == "moderator":  # New role available
-        return f"Moderator {user.name} ({user.email})"
+    if user.role == "moderator":
+        return f"Moderator {user.name}"
     elif user.role == "admin":
         return f"Admin {user.name}"
     else:
         return f"User {user.name}"
 
-# Old code that doesn't handle "moderator" causes type errors
+# Old code gets type errors
 def old_process_user(user: UserV2) -> str:
     if user.role == "admin":
         return "admin"
-    # Type checker warns: not all cases handled!
-    return "user"  # Missing "moderator" case
+    # Type checker warns: missing cases!
+    return "user"
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Evolution**
 
 ```{typescript}
 import { z } from "zod";
@@ -1094,20 +1303,27 @@ const UserV1Schema = z.object({
   role: z.enum(["user", "admin"]),
 });
 
-// Version 2: Add new role, change field
+// Version 2: Updated schema
 const UserV2Schema = z.object({
   name: z.string(),
-  role: z.enum(["user", "admin", "moderator"]),  // Added "moderator"
-  email: z.string(),                             // Added required email field
+  role: z.enum(["user", "admin", "moderator"]),
+  email: z.string(),  // New required field
 });
 
 type UserV2 = z.infer<typeof UserV2Schema>;
+```
 
-// TypeScript immediately catches outdated code
+:::
+
+::: {.column width="50%"}
+
+**Type-Checked Usage**
+
+```{typescript}
+// Types automatically update
 function processUser(user: UserV2): string {
-  // IDE autocomplete shows all three roles
-  if (user.role === "moderator") {  // New role available
-    return `Moderator ${user.name} (${user.email})`;
+  if (user.role === "moderator") {
+    return `Moderator ${user.name}`;
   } else if (user.role === "admin") {
     return `Admin ${user.name}`;
   } else {
@@ -1115,15 +1331,19 @@ function processUser(user: UserV2): string {
   }
 }
 
-// Old code that doesn't handle "moderator" causes type errors
+// Old code gets type errors
 function oldProcessUser(user: UserV2): string {
   if (user.role === "admin") {
     return "admin";
   }
-  // TypeScript warns: not all cases handled!
-  return "user";  // Missing "moderator" case
+  // TypeScript warns: missing cases!
+  return "user";
 }
 ```
+
+:::
+
+::::
 
 :::
 
@@ -1136,10 +1356,6 @@ function oldProcessUser(user: UserV2): string {
 *Reduce test burden with built-in validation*
 
 ## Reduced Test Burden {.smaller}
-
-Library handles edge cases—fewer validation tests needed.
-
-. . .
 
 ::: {.panel-tabset}
 
@@ -1316,19 +1532,20 @@ describe("User permissions", () => {
 
 ## Easy Mock Data Generation {.smaller}
 
-Generate valid test data from schemas.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic + Hypothesis)
 
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
+
 ```{python}
-from pydantic import BaseModel, Field, EmailStr
-from hypothesis import given, strategies as st
+from pydantic import BaseModel, Field
 from hypothesis.strategies import builds
-import pydantic
+from pydantic_factories import ModelFactory
 
 class Product(BaseModel):
     product_id: str = Field(pattern=r'^PROD-\d+$')
@@ -1336,27 +1553,42 @@ class Product(BaseModel):
     price: float = Field(gt=0, le=10000)
     in_stock: bool
 
-# Hypothesis can generate valid Product instances automatically
+class ProductFactory(ModelFactory):
+    __model__ = Product
+```
+
+:::
+
+::: {.column width="50%"}
+
+**Test Data Generation**
+
+```{python}
+# Hypothesis auto-generates valid instances
 @given(builds(Product))
 def test_product_discount(product):
     discounted = apply_discount(product, 0.1)
     assert discounted.price < product.price
     assert discounted.product_id == product.product_id
 
-# Or use pydantic-factories
-from pydantic_factories import ModelFactory
-
-class ProductFactory(ModelFactory):
-    __model__ = Product
-
-# Generate test data easily
+# Factory generates test data easily
 def test_bulk_operations():
     products = [ProductFactory.build() for _ in range(100)]
     result = bulk_update_inventory(products)
     assert len(result) == 100
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod + Faker)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -1370,33 +1602,38 @@ const ProductSchema = z.object({
 });
 
 type Product = z.infer<typeof ProductSchema>;
+```
 
-// Helper to generate valid Product
+:::
+
+::: {.column width="50%"}
+
+**Test Data Generation**
+
+```{typescript}
+// Helper generates valid Product
 function generateProduct(): Product {
   return ProductSchema.parse({
     productId: `PROD-${faker.number.int({ min: 1000, max: 9999 })}`,
     name: faker.commerce.productName(),
-    price: faker.number.float({ min: 0.01, max: 10000, precision: 0.01 }),
+    price: faker.number.float({ min: 0.01, max: 10000 }),
     inStock: faker.datatype.boolean(),
   });
 }
 
 // Use in tests
 describe("Product operations", () => {
-  it("should apply discount correctly", () => {
+  it("applies discount correctly", () => {
     const product = generateProduct();
     const discounted = applyDiscount(product, 0.1);
     expect(discounted.price).toBeLessThan(product.price);
-    expect(discounted.productId).toBe(product.productId);
-  });
-
-  it("should handle bulk operations", () => {
-    const products = Array.from({ length: 100 }, generateProduct);
-    const result = bulkUpdateInventory(products);
-    expect(result).toHaveLength(100);
   });
 });
 ```
+
+:::
+
+::::
 
 :::
 
@@ -1406,13 +1643,15 @@ describe("Product operations", () => {
 
 ## Contract Testing {.smaller}
 
-Shared schemas between frontend/backend ensure compatibility.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python Backend (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 # backend/schemas/user.py
@@ -1437,8 +1676,16 @@ class UserResponse(BaseModel):
     username: str
     created_at: datetime
     is_verified: bool
+```
 
-# FastAPI automatically generates OpenAPI spec from Pydantic models
+:::
+
+::: {.column width="50%"}
+
+**FastAPI Endpoint**
+
+```{python}
+# FastAPI generates OpenAPI spec automatically
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -1449,7 +1696,17 @@ def get_user(user_id: str) -> UserResponse:
     return UserResponse(...)
 ```
 
+:::
+
+::::
+
 ### TypeScript Frontend (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 // frontend/schemas/user.ts
@@ -1465,22 +1722,34 @@ export const UserResponseSchema = z.object({
 });
 
 export type UserResponse = z.infer<typeof UserResponseSchema>;
+```
 
+:::
+
+::: {.column width="50%"}
+
+**API Client Usage**
+
+```{typescript}
 // API client with validated responses
 async function getUser(userId: string): Promise<UserResponse> {
   const response = await fetch(`/api/users/${userId}`);
   const json = await response.json();
 
-  // Validate that backend actually returns expected structure
-  // Catches API contract violations immediately!
+  // Validate backend returns expected structure
+  // Catches API contract violations!
   return UserResponseSchema.parse(json);
 }
 
 // Usage with guaranteed type safety
 const user = await getUser("USR-123");
-console.log(user.username);  // TypeScript knows this exists
-console.log(user.created_at);  // TypeScript knows this is Date
+console.log(user.username);  // TS knows exists
+console.log(user.created_at);  // TS knows is Date
 ```
+
+:::
+
+::::
 
 :::
 
@@ -1494,71 +1763,98 @@ console.log(user.created_at);  // TypeScript knows this is Date
 
 ## Input Sanitization {.smaller}
 
-Strips unknown/dangerous fields automatically—prevents mass assignment vulnerabilities.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 from pydantic import BaseModel, ConfigDict
 
 class UserUpdate(BaseModel):
-    model_config = ConfigDict(extra='forbid')  # Reject unknown fields
-
+    model_config = ConfigDict(extra='forbid')
     email: str
+```
 
-# Malicious request trying to escalate privileges
+:::
+
+::: {.column width="50%"}
+
+**Mass Assignment Prevention**
+
+```{python}
+# Malicious request
 malicious_data = {
     "email": "hacker@evil.com",
-    "is_admin": True,  # Trying to set admin!
-    "balance": 999999,  # Trying to set account balance!
+    "is_admin": True,  # Attack!
+    "balance": 999999,  # Attack!
 }
 
 try:
     user_update = UserUpdate(**malicious_data)
 except ValidationError as e:
-    # Pydantic rejects unknown fields
     print("Attack prevented!")
-    # Error: Extra inputs are not permitted
 
-# Safe version - only allowed fields pass through
+# Safe version
 safe_data = {"email": "hacker@evil.com"}
 user_update = UserUpdate(**safe_data)
-# is_admin and balance are completely ignored
+# Malicious fields rejected
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
 
 const UserUpdateSchema = z.strictObject({
   email: z.string().email(),
-});  // Reject unknown fields
+});
+```
 
-// Malicious request trying to escalate privileges
+:::
+
+::: {.column width="50%"}
+
+**Mass Assignment Prevention**
+
+```{typescript}
+// Malicious request
 const maliciousData = {
   email: "hacker@evil.com",
-  isAdmin: true,  // Trying to set admin!
-  balance: 999999,  // Trying to set account balance!
+  isAdmin: true,  // Attack!
+  balance: 999999,  // Attack!
 };
 
 try {
   const userUpdate = UserUpdateSchema.parse(maliciousData);
 } catch (error) {
-  // Zod rejects unknown fields
   console.log("Attack prevented!");
-  // Error: Unrecognized key(s) in object: 'isAdmin', 'balance'
 }
 
-// Safe version - only allowed fields pass through
+// Safe version
 const safeData = { email: "hacker@evil.com" };
 const userUpdate = UserUpdateSchema.parse(safeData);
-// isAdmin and balance are completely ignored
+// Malicious fields rejected
 ```
+
+:::
+
+::::
 
 :::
 
@@ -1568,13 +1864,15 @@ const userUpdate = UserUpdateSchema.parse(safeData);
 
 ## Type Confusion Prevention {.smaller}
 
-Prevents exploitation of loose type coercion in JavaScript/Python.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 from pydantic import BaseModel, Field
@@ -1583,23 +1881,30 @@ class PaymentRequest(BaseModel):
     user_id: str
     amount: float = Field(gt=0)
     currency: str = Field(pattern=r'^[A-Z]{3}$')
+```
 
-# Attack: Trying to bypass amount validation with string
+:::
+
+::: {.column width="50%"}
+
+**Type Confusion Prevention**
+
+```{python}
+# Attack: String instead of float
 attack_data = {
     "user_id": "USR-123",
-    "amount": "0.01 OR 1=1",  # SQL injection attempt via type confusion
+    "amount": "0.01 OR 1=1",  # Attack!
     "currency": "USD"
 }
 
 try:
     payment = PaymentRequest(**attack_data)
 except ValidationError:
-    print("Type confusion attack blocked!")
-    # Error: value is not a valid float
+    print("Attack blocked!")
 
-# Attack: Trying to pass array instead of single value
+# Attack: Array instead of string
 attack_data2 = {
-    "user_id": ["USR-123", "USR-ADMIN"],  # Array confusion
+    "user_id": ["USR-123", "ADMIN"],  # Attack!
     "amount": 10.0,
     "currency": "USD"
 }
@@ -1607,11 +1912,20 @@ attack_data2 = {
 try:
     payment = PaymentRequest(**attack_data2)
 except ValidationError:
-    print("Type confusion attack blocked!")
-    # Error: str type expected
+    print("Attack blocked!")
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -1621,33 +1935,43 @@ const PaymentRequestSchema = z.object({
   amount: z.number().positive(),
   currency: z.string().regex(/^[A-Z]{3}$/),
 });
+```
 
-// Attack: Trying to bypass amount validation with string
+:::
+
+::: {.column width="50%"}
+
+**Type Confusion Prevention**
+
+```{typescript}
+// Attack: String instead of number
 const attackData = {
   userId: "USR-123",
-  amount: "0.01 OR 1=1",  // SQL injection attempt via type confusion
+  amount: "0.01 OR 1=1",  // Attack!
   currency: "USD"
 };
 
 const result = PaymentRequestSchema.safeParse(attackData);
 if (!result.success) {
-  console.log("Type confusion attack blocked!");
-  // Error: Expected number, received string
+  console.log("Attack blocked!");
 }
 
-// Attack: Trying to pass array instead of single value
+// Attack: Array instead of string
 const attackData2 = {
-  userId: ["USR-123", "USR-ADMIN"],  // Array confusion
+  userId: ["USR-123", "ADMIN"],  // Attack!
   amount: 10.0,
   currency: "USD"
 };
 
 const result2 = PaymentRequestSchema.safeParse(attackData2);
 if (!result2.success) {
-  console.log("Type confusion attack blocked!");
-  // Error: Expected string, received array
+  console.log("Attack blocked!");
 }
 ```
+
+:::
+
+::::
 
 :::
 
@@ -1657,13 +1981,15 @@ if (!result2.success) {
 
 ## Size & Range Limits {.smaller}
 
-Constraints on string lengths, number ranges, array sizes prevent DoS attacks.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 from pydantic import BaseModel, Field, field_validator
@@ -1681,12 +2007,20 @@ class CommentSubmission(BaseModel):
         if any(len(tag) > 30 for tag in tags):
             raise ValueError('Tag too long')
         return tags
+```
 
-# DoS Attack: Massive content to exhaust memory/database
+:::
+
+::: {.column width="50%"}
+
+**DoS Attack Prevention**
+
+```{python}
+# Attack: Massive content
 dos_attack = {
     "post_id": "POST-123",
     "author": "attacker",
-    "content": "X" * 1_000_000,  # 1MB of text!
+    "content": "X" * 1_000_000,  # 1MB!
     "tags": ["spam"] * 1000,  # 1000 tags!
     "rating": 999  # Out of range
 }
@@ -1696,12 +2030,22 @@ try:
 except ValidationError as e:
     print("DoS attack prevented!")
     # Errors:
-    # - content: ensure this value has at most 5000 characters
-    # - tags: ensure this value has at most 10 items
-    # - rating: ensure this value is less than or equal to 5
+    # - content: max 5000 characters
+    # - tags: max 10 items
+    # - rating: max 5
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -1713,12 +2057,20 @@ const CommentSubmissionSchema = z.object({
   tags: z.array(z.string().max(30)).max(10),
   rating: z.number().int().min(1).max(5),
 });
+```
 
-// DoS Attack: Massive content to exhaust memory/database
+:::
+
+::: {.column width="50%"}
+
+**DoS Attack Prevention**
+
+```{typescript}
+// Attack: Massive content
 const dosAttack = {
   postId: "POST-123",
   author: "attacker",
-  content: "X".repeat(1_000_000),  // 1MB of text!
+  content: "X".repeat(1_000_000),  // 1MB!
   tags: Array(1000).fill("spam"),  // 1000 tags!
   rating: 999  // Out of range
 };
@@ -1727,11 +2079,15 @@ const result = CommentSubmissionSchema.safeParse(dosAttack);
 if (!result.success) {
   console.log("DoS attack prevented!");
   // Errors:
-  // - content: String must contain at most 5000 character(s)
-  // - tags: Array must contain at most 10 element(s)
-  // - rating: Number must be less than or equal to 5
+  // - content: max 5000 character(s)
+  // - tags: max 10 element(s)
+  // - rating: max 5
 }
 ```
+
+:::
+
+::::
 
 :::
 
@@ -1745,20 +2101,18 @@ if (!result.success) {
 
 ## API Design & Documentation {.smaller}
 
-Auto-generate OpenAPI/Swagger specs from schemas—docs stay synchronized.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (FastAPI + Pydantic)
 
-```{python}
-from fastapi import FastAPI
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
-from typing import List
+:::: {.columns}
 
-app = FastAPI(title="User API")
+::: {.column width="50%"}
+
+**Schema Definition**
+
+```{python}
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 class User(BaseModel):
     model_config = ConfigDict(
@@ -1776,25 +2130,46 @@ class User(BaseModel):
     email: EmailStr = Field(description="User's email address")
     username: str = Field(min_length=3, max_length=20)
     is_active: bool = Field(default=True)
+```
+
+:::
+
+::: {.column width="50%"}
+
+**FastAPI Endpoint**
+
+```{python}
+from fastapi import FastAPI
+
+app = FastAPI(title="User API")
 
 @app.post("/users", response_model=User,
           summary="Create new user",
           description="Creates a new user with validated data")
 def create_user(user: User) -> User:
     # FastAPI automatically:
-    # - Validates request body against User schema
+    # - Validates request body
     # - Generates OpenAPI/Swagger docs
-    # - Provides interactive API docs at /docs
+    # - Provides interactive docs at /docs
     return user
 
-# Visit /docs for automatically generated interactive documentation!
-# Schema validation = API documentation, always in sync!
+# Visit /docs for auto-generated documentation!
+# Schema validation = API docs, always in sync!
 ```
+
+:::
+
+::::
 
 ### TypeScript (Express + Zod)
 
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
+
 ```{typescript}
-import express from "express";
 import { z } from "zod";
 import { generateSchema } from "@anatine/zod-openapi";
 
@@ -1813,6 +2188,16 @@ const UserSchema = z.object({
 });
 
 type User = z.infer<typeof UserSchema>;
+```
+
+:::
+
+::: {.column width="50%"}
+
+**Express Endpoint**
+
+```{typescript}
+import express from "express";
 
 const app = express();
 
@@ -1831,8 +2216,12 @@ app.post("/users", (req, res) => {
 
 // Generate OpenAPI spec from Zod schemas
 const openApiSchema = generateSchema(UserSchema);
-// Use with swagger-ui-express for documentation
+// Use with swagger-ui-express for docs
 ```
+
+:::
+
+::::
 
 :::
 
@@ -1842,13 +2231,15 @@ const openApiSchema = generateSchema(UserSchema);
 
 ## Data Transformation {.smaller}
 
-Built-in serialization/deserialization—date parsing, nested object handling.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 from pydantic import BaseModel, Field, model_validator, field_serializer
@@ -1857,7 +2248,7 @@ from datetime import datetime
 class BlogPost(BaseModel):
     title: str
     slug: str
-    published_at: datetime  # Auto-parses ISO strings
+    published_at: datetime
     tags: list[str]
     view_count: int = 0
 
@@ -1871,27 +2262,42 @@ class BlogPost(BaseModel):
     @field_serializer('published_at')
     def serialize_datetime(self, value: datetime) -> str:
         return value.isoformat()
+```
 
-# Input with various formats
-raw_data = {
-    "title": "My Blog Post",
-    "published_at": "2024-01-15T10:30:00Z",  # String → datetime
-    "tags": "python,fastapi,pydantic",       # Can use custom parser
-}
+:::
 
+::: {.column width="50%"}
+
+**Transformation Examples**
+
+```{python}
+# Parse with transformations
 post = BlogPost(
     title="My Blog Post",
-    slug="",                              # Auto-generated from title
-    published_at="2024-01-15T10:30:00",   # String → datetime object
+    slug="",                              # Auto-generated
+    published_at="2024-01-15T10:30:00",   # String → datetime
     tags=["python", "fastapi", "pydantic"]
 )
+
+print(post.slug)  # "my-blog-post"
+print(post.published_at)  # datetime object
 
 # Serialize back to JSON
 print(post.model_dump_json())
 # {"title":"My Blog Post","slug":"my-blog-post",...}
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -1899,28 +2305,33 @@ import { z } from "zod";
 const BlogPostSchema = z.object({
   title: z.string(),
   slug: z.string().transform((val, ctx) => {
-    // Auto-generate slug if empty
     return val || ctx.path[0].toString().toLowerCase().replace(/\s+/g, "-");
   }),
-  publishedAt: z.coerce.date(),  // Auto-parses ISO strings
+  publishedAt: z.coerce.date(),
   tags: z.union([
     z.array(z.string()),
-    z.string().transform(s => s.split(","))  // Parse "a,b,c" → ["a","b","c"]
+    z.string().transform(s => s.split(","))
   ]),
   viewCount: z.number().default(0),
 });
 
 type BlogPost = z.infer<typeof BlogPostSchema>;
+```
 
-// Input with various formats
-const rawData = {
+:::
+
+::: {.column width="50%"}
+
+**Transformation Examples**
+
+```{typescript}
+// Parse with transformations
+const post = BlogPostSchema.parse({
   title: "My Blog Post",
   slug: "",
-  publishedAt: "2024-01-15T10:30:00Z",  // String → Date object
+  publishedAt: "2024-01-15T10:30:00Z",  // String → Date
   tags: "python,fastapi,pydantic",  // String → Array
-};
-
-const post = BlogPostSchema.parse(rawData);
+});
 
 console.log(post.slug);  // "my-blog-post" (auto-generated)
 console.log(post.publishedAt);  // Date object
@@ -1932,25 +2343,31 @@ console.log(JSON.stringify(post));
 
 :::
 
+::::
+
+:::
+
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 **Smart transformations**: Parse, normalize, and serialize complex data automatically!
 :::
 
 ## Immutable Configs: Validate Once, Done {.smaller}
 
-Frozen/immutable models validate once and guarantee immutability.
-
-. . .
-
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{python}
 from pydantic import BaseModel, Field, ConfigDict
 
 class DatabaseConfig(BaseModel):
-    model_config = ConfigDict(frozen=True)  # Immutable after creation
+    model_config = ConfigDict(frozen=True)
 
     host: str
     port: int = Field(ge=1, le=65535)
@@ -1958,7 +2375,7 @@ class DatabaseConfig(BaseModel):
     max_connections: int = Field(ge=1, le=100)
     timeout_seconds: int = Field(ge=1)
 
-# Validated once at application startup
+# Validated once at startup
 db_config = DatabaseConfig(
     host="localhost",
     port=5432,
@@ -1966,25 +2383,42 @@ db_config = DatabaseConfig(
     max_connections=20,
     timeout_seconds=30
 )
+```
 
-# Guaranteed valid throughout application lifecycle
+:::
+
+::: {.column width="50%"}
+
+**Immutability Benefits**
+
+```{python}
+# Guaranteed valid throughout lifecycle
 # Attempts to modify raise an error
 try:
-    db_config.port = 9999  # ValidationError: "Instance is frozen"
+    db_config.port = 9999
 except ValidationError as e:
     print("Config is immutable!")
 
 # Use confidently without re-validation
 def connect_db():
-    # No need to re-validate - guaranteed correct
     connection = psycopg2.connect(
         host=db_config.host,      # Always valid
-        port=db_config.port,      # Always in range 1-65535
+        port=db_config.port,      # Always 1-65535
         database=db_config.database
     )
 ```
 
+:::
+
+::::
+
 ### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Schema Definition**
 
 ```{typescript}
 import { z } from "zod";
@@ -1999,7 +2433,7 @@ const DatabaseConfigSchema = z.object({
 
 type DatabaseConfig = z.infer<typeof DatabaseConfigSchema>;
 
-// Validated once at application startup
+// Validated once at startup
 const dbConfig = DatabaseConfigSchema.parse({
   host: "localhost",
   port: 5432,
@@ -2007,27 +2441,42 @@ const dbConfig = DatabaseConfigSchema.parse({
   maxConnections: 20,
   timeoutSeconds: 30,
 }) as Readonly<DatabaseConfig>;
+```
 
-// Guaranteed valid throughout application lifecycle
-// TypeScript prevents modification at compile time
-// dbConfig.port = 9999;  // TypeScript error: Cannot assign to 'port' because it is a read-only property
+:::
+
+::: {.column width="50%"}
+
+**Immutability Benefits**
+
+```{typescript}
+// Guaranteed valid throughout lifecycle
+// TypeScript prevents modification
+try {
+  dbConfig.port = 9999;  // Compile error!
+} catch (error) {
+  console.log("Config is immutable!");
+}
 
 // Use confidently without re-validation
 function connectDb() {
-  // No need to re-validate - guaranteed correct
   const connection = createConnection({
     host: dbConfig.host,      // Always valid
-    port: dbConfig.port,      // Always in range 1-65535
-    database: dbConfig.database,
+    port: dbConfig.port,      // Always 1-65535
+    database: dbConfig.database
   });
 }
 ```
 
 :::
 
+::::
+
+:::
+
 . . .
 
-::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px;"}
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 0.85em;"}
 
 **Benefits of frozen/immutable configs**:
 
@@ -2040,10 +2489,6 @@ function connectDb() {
 :::
 
 ## Developer Experience {.smaller}
-
-Reduces boilerplate—cross-language consistency improves onboarding.
-
-. . .
 
 ::: {.panel-tabset}
 
