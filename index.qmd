@@ -57,6 +57,7 @@ Source code: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/Indr
 ## What You'll Learn {.smaller}
 
 - Why data validation libraries are essential for robust applications
+- Why validation is needed on **both** client and server (not just one)
 - How Pydantic (Python) and Zod (TypeScript) improve code quality
 - Benefits across readability, runtime behavior, typing, testing, and security
 
@@ -2092,6 +2093,192 @@ if (!result.success) {
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 **Resource protection**: Limit input sizes to prevent memory/storage exhaustion attacks!
+:::
+
+# Full-Stack Validation
+
+*Client + Server validation for security and UX*
+
+## Why Both Sides Matter {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; font-size: 0.85em;"}
+
+**❌ Client-Only Validation**
+
+```typescript
+// Frontend validates
+const UserSchema = z.object({
+  role: z.enum(["user", "guest"]),
+});
+```
+
+```python
+# Backend trusts blindly
+@app.post("/api/users")
+def create_user(data: dict):
+    user = User(**data)  # No validation!
+    db.save(user)
+```
+
+**Attack:**
+```bash
+# Bypass frontend entirely
+curl -X POST /api/users -d '{
+  "role": "admin",
+  "balance": 999999
+}'
+```
+
+**Result**: Privilege escalation, mass assignment, SQL injection
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; font-size: 0.85em;"}
+
+**⚠️ Server-Only Validation**
+
+```typescript
+// Frontend sends unvalidated data
+async function submit(data: any) {
+  await fetch("/api/users", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+```
+
+```python
+# Backend validates
+class User(BaseModel):
+    email: EmailStr
+    age: int = Field(ge=18)
+```
+
+**User Experience:**
+
+1. Submit form → wait 200ms
+2. "Email invalid" → fix → wait 200ms
+3. "Age too low" → fix → wait 200ms
+4. Finally succeeds after 3 round trips
+
+**Result**: Frustration, poor UX, abandoned forms
+
+:::
+
+:::
+
+::::
+
+## Validate Everywhere {.smaller}
+
+::: {.panel-tabset}
+
+### Client (UX)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```typescript
+import { z } from "zod";
+
+const UserSchema = z.object({
+  username: z.string().min(3).max(20),
+  email: z.string().email(),
+  role: z.enum(["user", "guest"]),
+});
+
+async function submitUser(data: unknown) {
+  const result = UserSchema.safeParse(data);
+
+  if (!result.success) {
+    showErrors(result.error.format());
+    return; // Instant feedback
+  }
+
+  await createUser(result.data);
+}
+```
+
+:::
+
+::: {.column width="50%"}
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px;"}
+
+**Benefits:**
+
+- ✅ Instant feedback
+- ✅ Better UX
+- ✅ Reduced server load
+- ✅ Works offline
+
+**Not for security!**
+
+:::
+
+:::
+
+::::
+
+### Server (Security)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```python
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from typing import Literal
+
+class UserCreate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+    username: str = Field(min_length=3, max_length=20)
+    email: EmailStr
+    role: Literal["user", "guest"]
+
+@app.post("/api/users")
+def create_user(user: UserCreate):
+    db.save(user)
+    return user
+```
+
+:::
+
+::: {.column width="50%"}
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px;"}
+
+**Benefits:**
+
+- ✅ Never trust client
+- ✅ Blocks attacks
+- ✅ Data integrity
+- ✅ Mass assignment protection
+
+**Mandatory for security!**
+
+:::
+
+:::
+
+::::
+
+:::
+
+::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+
+**Defense in depth**: Client for UX, server for security. Both are essential.
+
 :::
 
 # Additional Benefits
