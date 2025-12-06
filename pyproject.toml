@@ -1,0 +1,26 @@
+[project]
+name = "parse-dont-pray"
+version = "1.0.0"
+description = "A presentation exploring the benefits of data validation libraries like Pydantic and Zod"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "CC0 1.0 Universal" }
+authors = [
+    { name = "Indrajeet Patil", email = "patilindrajeet.science@gmail.com" }
+]
+keywords = [
+    "data-validation",
+    "pydantic",
+    "zod",
+    "python",
+    "typescript",
+    "software-engineering",
+    "type-safety"
+]
+dependencies = ["jupyter>=1.0.0", "ipykernel>=6.29.0", "matplotlib>=3.8.0"]
+
+[tool.uv]
+required-version = ">=0.9.15"
+
+[dependency-groups]
+dev = []

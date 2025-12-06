@@ -1,11 +1,27 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-README.html
+# macOS
 .DS_Store
-.claude
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+env/
+venv/
+ENV/
+.ipynb_checkpoints
+
+# Quarto
+/.quarto/
+_site/
+README.html
+
+# Claude
+.claude/
+
+# Generated files
 _extensions/
 index.html
 index_files/

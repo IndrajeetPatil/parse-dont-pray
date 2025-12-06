@@ -1,6 +1,8 @@
 ---
 format:
   revealjs:
+    title-slide-attributes:
+      data-visibility: hidden
     css: style.css
     theme: simple
     slide-number: true
@@ -11,6 +13,7 @@ format:
     help: true
     include-in-header: meta-tags.html
     link-external-newwindow: true
+    mermaid-format: png
 revealjs-plugins:
   - fontawesome
 execute:
@@ -21,7 +24,7 @@ description-meta: "Explore the benefits of data validation libraries like Pydant
 license: "CC0 1.0 Universal"
 pagetitle: "Parse, Don't Pray: The Case for Data Validation"
 author-meta: "Indrajeet Patil"
-date-meta: "`r Sys.time()`"
+date-meta: "2025-12-06"
 lang: "en"
 dir: "ltr"
 image: "media/social-media-card.jpg"
@@ -29,11 +32,7 @@ image-alt: "Parse, Don't Pray - Two hands clasped together symbolizing the partn
 canonical-url: "https://indrajeetpatil.github.io/parse-dont-pray/"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(eval = FALSE)
-```
-
-## {style="margin-top: 1em;"}
+## {.unnumbered .unlisted}
 
 ::: {style="text-align: center;"}
 
@@ -271,7 +270,7 @@ TypeScript-first schema validation with type inference
 
 ### Python (Pydantic)
 
-```{python}
+```python
 from pydantic import BaseModel, EmailStr, Field
 from typing import Literal
 
@@ -285,7 +284,7 @@ class UserProfile(BaseModel):
 
 ### TypeScript (Zod)
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const UserProfileSchema = z.object({
@@ -317,7 +316,7 @@ The schema **is** the documentation—no separate docs needed!
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from uuid import UUID
@@ -343,7 +342,7 @@ class Order(BaseModel):
 
 **Usage Example**
 
-```{python}
+```python
 # Create an order instance
 order = Order(
     order_id="ORD-123",
@@ -370,7 +369,7 @@ Schema definition, validation logic, and type information in one place.
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const OrderSchema = z.strictObject({
@@ -390,7 +389,7 @@ type Order = z.infer<typeof OrderSchema>;
 
 **Usage Example**
 
-```{typescript}
+```typescript
 // Create an order instance
 const order = OrderSchema.parse({
   orderId: "ORD-123",
@@ -421,7 +420,7 @@ const order = OrderSchema.parse({
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
 
-```{python}
+```python
 # Imperative: Lots of manual checks
 def validate_user(data):
     if not isinstance(data.get('username'), str):
@@ -447,7 +446,7 @@ def validate_user(data):
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
-```{python}
+```python
 from pydantic import BaseModel, Field
 from typing import Literal
 
@@ -474,7 +473,7 @@ class User(BaseModel):
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
 
-```{typescript}
+```typescript
 // Imperative: Lots of manual checks
 function validateUser(data: any) {
   if (typeof data.username !== 'string') {
@@ -506,7 +505,7 @@ function validateUser(data: any) {
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 // Declarative: What the data should look like
@@ -547,7 +546,7 @@ Describes *what* the data should look like, not *how* to validate it.
 
 **❌ Generic: `str`**
 
-```{python}
+```python
 class User(BaseModel):
     email: str
 ```
@@ -566,7 +565,7 @@ class User(BaseModel):
 
 **⚠️ Better: `EmailStr`**
 
-```{python}
+```python
 from pydantic import EmailStr
 
 class User(BaseModel):
@@ -587,7 +586,7 @@ class User(BaseModel):
 
 **✅ Best: `AcmeEmailStr`**
 
-```{python}
+```python
 from pydantic import field_validator
 
 class AcmeEmailStr(EmailStr):
@@ -621,7 +620,7 @@ class User(BaseModel):
 
 **❌ Generic: `string`**
 
-```{typescript}
+```typescript
 const UserSchema = z.object({
   email: z.string(),
 });
@@ -641,7 +640,7 @@ const UserSchema = z.object({
 
 **⚠️ Better: `.email()`**
 
-```{typescript}
+```typescript
 const UserSchema = z.object({
   email: z.string().email(),
 });
@@ -661,7 +660,7 @@ const UserSchema = z.object({
 
 **✅ Best: Custom refinement**
 
-```{typescript}
+```typescript
 const acmeEmail = z
   .string()
   .email()
@@ -709,7 +708,7 @@ const UserSchema = z.object({
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, ValidationError, Field
 
 class ProductPrice(BaseModel):
@@ -724,7 +723,7 @@ class ProductPrice(BaseModel):
 
 **Validation Examples**
 
-```{python}
+```python
 # Valid data passes through
 valid_product = ProductPrice(
     product_id="PROD-123",
@@ -755,7 +754,7 @@ except ValidationError as e:
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const ProductPriceSchema = z.object({
@@ -771,7 +770,7 @@ const ProductPriceSchema = z.object({
 
 **Validation Examples**
 
-```{typescript}
+```typescript
 // Valid data passes through
 const validProduct = ProductPriceSchema.parse({
   productId: "PROD-123",
@@ -813,7 +812,7 @@ Data validated as it enters the system, catching errors early.
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -830,7 +829,7 @@ class Event(BaseModel):
 
 **Coercion Examples**
 
-```{python}
+```python
 # String inputs are intelligently coerced
 event = Event(
     event_id="42",                    # → int 42
@@ -857,7 +856,7 @@ print(event.attendees)  # ["Alice", "Bob"]
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const EventSchema = z.object({
@@ -874,7 +873,7 @@ const EventSchema = z.object({
 
 **Coercion Examples**
 
-```{typescript}
+```typescript
 // String inputs are intelligently coerced
 const event = EventSchema.parse({
   eventId: "42",                     // → number 42
@@ -911,7 +910,7 @@ console.log(event.attendees);  // ["Alice", "Bob"]
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, ValidationError, EmailStr, Field
 
 class SignupForm(BaseModel):
@@ -925,7 +924,7 @@ class SignupForm(BaseModel):
 
 **Error Messages**
 
-```{python}
+```python
 try:
     user = SignupForm(
         username="ab",        # Too short
@@ -956,7 +955,7 @@ except ValidationError as e:
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const SignupFormSchema = z.object({
@@ -971,7 +970,7 @@ const SignupFormSchema = z.object({
 
 **Error Messages**
 
-```{typescript}
+```typescript
 const result = SignupFormSchema.safeParse({
   username: "ab",            // Too short
   email: "not-an-email",     // Invalid format
@@ -1015,7 +1014,7 @@ Specific, actionable feedback about what's wrong and where.
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel
 from typing import Optional
 
@@ -1038,7 +1037,7 @@ class Person(BaseModel):
 
 **Type Inference**
 
-```{python}
+```python
 # Type checkers understand types automatically
 def get_person_city(person: Person) -> str:
     return person.address.city
@@ -1069,7 +1068,7 @@ city: str = get_person_city(person)
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const AddressSchema = z.object({
@@ -1093,7 +1092,7 @@ const PersonSchema = z.object({
 
 **Type Inference**
 
-```{typescript}
+```typescript
 // Types automatically inferred from schema
 type Person = z.infer<typeof PersonSchema>;
 
@@ -1136,7 +1135,7 @@ const city: string = getPersonCity(person);
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -1152,7 +1151,7 @@ class ApiResponse(BaseModel):
 
 **Type-Safe Usage**
 
-```{python}
+```python
 def fetch_data_from_api() -> ApiResponse:
     raw_response = requests.get(
         "https://api.example.com/data"
@@ -1182,7 +1181,7 @@ process_response(response)
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const ApiResponseSchema = z.object({
@@ -1200,7 +1199,7 @@ type ApiResponse = z.infer<typeof ApiResponseSchema>;
 
 **Type-Safe Usage**
 
-```{typescript}
+```typescript
 async function fetchDataFromApi(): Promise<ApiResponse> {
   const rawResponse = await fetch(
     "https://api.example.com/data"
@@ -1242,7 +1241,7 @@ function processResponse(response: ApiResponse): void {
 
 **Schema Evolution**
 
-```{python}
+```python
 from pydantic import BaseModel, Field
 from typing import Literal
 
@@ -1264,7 +1263,7 @@ class UserV2(BaseModel):
 
 **Type-Checked Usage**
 
-```{python}
+```python
 # Types automatically update
 def process_user(user: UserV2) -> str:
     if user.role == "moderator":
@@ -1294,7 +1293,7 @@ def old_process_user(user: UserV2) -> str:
 
 **Schema Evolution**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 // Version 1: Original schema
@@ -1319,7 +1318,7 @@ type UserV2 = z.infer<typeof UserV2Schema>;
 
 **Type-Checked Usage**
 
-```{typescript}
+```typescript
 // Types automatically update
 function processUser(user: UserV2): string {
   if (user.role === "moderator") {
@@ -1369,7 +1368,7 @@ function oldProcessUser(user: UserV2): string {
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
 
-```{python}
+```python
 # Need extensive tests for every validation rule
 def test_user_validation():
     # Test username length
@@ -1405,7 +1404,7 @@ def test_user_validation():
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
-```{python}
+```python
 from pydantic import BaseModel, Field, EmailStr
 from typing import Literal
 
@@ -1445,7 +1444,7 @@ def test_user_permissions():
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
 
-```{typescript}
+```typescript
 // Need extensive tests for every validation rule
 describe("User validation", () => {
   // Test username length
@@ -1484,7 +1483,7 @@ describe("User validation", () => {
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const UserSchema = z.object({
@@ -1542,7 +1541,7 @@ describe("User permissions", () => {
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, Field
 from hypothesis.strategies import builds
 from pydantic_factories import ModelFactory
@@ -1563,7 +1562,7 @@ class ProductFactory(ModelFactory):
 
 **Test Data Generation**
 
-```{python}
+```python
 # Hypothesis auto-generates valid instances
 @given(builds(Product))
 def test_product_discount(product):
@@ -1590,7 +1589,7 @@ def test_bulk_operations():
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 import { faker } from "@faker-js/faker";
 
@@ -1610,7 +1609,7 @@ type Product = z.infer<typeof ProductSchema>;
 
 **Test Data Generation**
 
-```{typescript}
+```typescript
 // Helper generates valid Product
 function generateProduct(): Product {
   return ProductSchema.parse({
@@ -1653,7 +1652,7 @@ describe("Product operations", () => {
 
 **Schema Definition**
 
-```{python}
+```python
 # backend/schemas/user.py
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
@@ -1684,7 +1683,7 @@ class UserResponse(BaseModel):
 
 **FastAPI Endpoint**
 
-```{python}
+```python
 # FastAPI generates OpenAPI spec automatically
 from fastapi import FastAPI
 
@@ -1708,7 +1707,7 @@ def get_user(user_id: str) -> UserResponse:
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 // frontend/schemas/user.ts
 import { z } from "zod";
 
@@ -1730,7 +1729,7 @@ export type UserResponse = z.infer<typeof UserResponseSchema>;
 
 **API Client Usage**
 
-```{typescript}
+```typescript
 // API client with validated responses
 async function getUser(userId: string): Promise<UserResponse> {
   const response = await fetch(`/api/users/${userId}`);
@@ -1773,7 +1772,7 @@ console.log(user.created_at);  // TS knows is Date
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, ConfigDict
 
 class UserUpdate(BaseModel):
@@ -1787,7 +1786,7 @@ class UserUpdate(BaseModel):
 
 **Mass Assignment Prevention**
 
-```{python}
+```python
 # Malicious request
 malicious_data = {
     "email": "hacker@evil.com",
@@ -1818,7 +1817,7 @@ user_update = UserUpdate(**safe_data)
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const UserUpdateSchema = z.strictObject({
@@ -1832,7 +1831,7 @@ const UserUpdateSchema = z.strictObject({
 
 **Mass Assignment Prevention**
 
-```{typescript}
+```typescript
 // Malicious request
 const maliciousData = {
   email: "hacker@evil.com",
@@ -1874,7 +1873,7 @@ const userUpdate = UserUpdateSchema.parse(safeData);
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, Field
 
 class PaymentRequest(BaseModel):
@@ -1889,7 +1888,7 @@ class PaymentRequest(BaseModel):
 
 **Type Confusion Prevention**
 
-```{python}
+```python
 # Attack: String instead of float
 attack_data = {
     "user_id": "USR-123",
@@ -1927,7 +1926,7 @@ except ValidationError:
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const PaymentRequestSchema = z.object({
@@ -1943,7 +1942,7 @@ const PaymentRequestSchema = z.object({
 
 **Type Confusion Prevention**
 
-```{typescript}
+```typescript
 // Attack: String instead of number
 const attackData = {
   userId: "USR-123",
@@ -1991,7 +1990,7 @@ if (!result2.success) {
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, Field, field_validator
 
 class CommentSubmission(BaseModel):
@@ -2015,7 +2014,7 @@ class CommentSubmission(BaseModel):
 
 **DoS Attack Prevention**
 
-```{python}
+```python
 # Attack: Massive content
 dos_attack = {
     "post_id": "POST-123",
@@ -2047,7 +2046,7 @@ except ValidationError as e:
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const CommentSubmissionSchema = z.object({
@@ -2065,7 +2064,7 @@ const CommentSubmissionSchema = z.object({
 
 **DoS Attack Prevention**
 
-```{typescript}
+```typescript
 // Attack: Massive content
 const dosAttack = {
   postId: "POST-123",
@@ -2111,7 +2110,7 @@ if (!result.success) {
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 class User(BaseModel):
@@ -2138,7 +2137,7 @@ class User(BaseModel):
 
 **FastAPI Endpoint**
 
-```{python}
+```python
 from fastapi import FastAPI
 
 app = FastAPI(title="User API")
@@ -2169,7 +2168,7 @@ def create_user(user: User) -> User:
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 import { generateSchema } from "@anatine/zod-openapi";
 
@@ -2196,7 +2195,7 @@ type User = z.infer<typeof UserSchema>;
 
 **Express Endpoint**
 
-```{typescript}
+```typescript
 import express from "express";
 
 const app = express();
@@ -2241,7 +2240,7 @@ const openApiSchema = generateSchema(UserSchema);
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, Field, model_validator, field_serializer
 from datetime import datetime
 
@@ -2270,7 +2269,7 @@ class BlogPost(BaseModel):
 
 **Transformation Examples**
 
-```{python}
+```python
 # Parse with transformations
 post = BlogPost(
     title="My Blog Post",
@@ -2299,7 +2298,7 @@ print(post.model_dump_json())
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const BlogPostSchema = z.object({
@@ -2324,7 +2323,7 @@ type BlogPost = z.infer<typeof BlogPostSchema>;
 
 **Transformation Examples**
 
-```{typescript}
+```typescript
 // Parse with transformations
 const post = BlogPostSchema.parse({
   title: "My Blog Post",
@@ -2363,7 +2362,7 @@ console.log(JSON.stringify(post));
 
 **Schema Definition**
 
-```{python}
+```python
 from pydantic import BaseModel, Field, ConfigDict
 
 class DatabaseConfig(BaseModel):
@@ -2391,7 +2390,7 @@ db_config = DatabaseConfig(
 
 **Immutability Benefits**
 
-```{python}
+```python
 # Guaranteed valid throughout lifecycle
 # Attempts to modify raise an error
 try:
@@ -2420,7 +2419,7 @@ def connect_db():
 
 **Schema Definition**
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 const DatabaseConfigSchema = z.object({
@@ -2449,7 +2448,7 @@ const dbConfig = DatabaseConfigSchema.parse({
 
 **Immutability Benefits**
 
-```{typescript}
+```typescript
 // Guaranteed valid throughout lifecycle
 // TypeScript prevents modification
 try {
@@ -2502,7 +2501,7 @@ function connectDb() {
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
 
-```{python}
+```python
 # Lots of manual work
 def create_user_without_pydantic(data: dict):
     # Manual validation
@@ -2538,7 +2537,7 @@ def create_user_without_pydantic(data: dict):
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
-```{python}
+```python
 from pydantic import BaseModel, EmailStr, Field
 
 # Concise and clear
@@ -2567,7 +2566,7 @@ user = User(**data)  # ← One line replaces 50+ lines
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
 
-```{typescript}
+```typescript
 // Lots of manual work
 function createUserWithoutZod(data: any): User {
   // Manual validation
@@ -2608,7 +2607,7 @@ function createUserWithoutZod(data: any): User {
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
-```{typescript}
+```typescript
 import { z } from "zod";
 
 // Concise and clear
@@ -2699,24 +2698,25 @@ Learn more about these powerful libraries:
 
 :::
 
-# Thank You!
+# Thank You
 
-And Happy Parsing! 🎉
+And Happy Parsing! 😊
 
-::: {.footer style="text-align: center; font-size: 0.55em; color: #999; position: absolute; bottom: 20px; left: 0; right: 0;"}
-Questions? Discussion? Visit: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/IndrajeetPatil/parse-dont-pray/)
+<br>
+<br>
+
+::: {style="text-align: center; font-size: 0.7em;"}
+
+Check out my other [slide decks](https://sites.google.com/site/indrajeetspatilmorality/presentations) on software development best practices
+
 :::
 
-# For more {data-visibility="uncounted"}
+::: {style="text-align: center; font-size: 1em;"}
 
-If you are interested in good programming and software development practices, check out my other [slide decks](https://sites.google.com/site/indrajeetspatilmorality/presentations).
+[{{< fa brands linkedin >}}](https://www.linkedin.com/in/indrajeet-patil-ph-d-397865174/)
+&nbsp;&nbsp;
+[{{< fa brands github >}}](http://github.com/IndrajeetPatil) 
+&nbsp;&nbsp;
+[{{< fa solid envelope >}}](mailto:patilindrajeet.science@gmail.com)
 
-# Find me at... {data-visibility="uncounted"}
-
-{{< fa brands linkedin >}} [LinkedIn](https://www.linkedin.com/in/indrajeet-patil-ph-d-397865174/)
-
-{{< fa brands github >}} [GitHub](http://github.com/IndrajeetPatil)
-
-{{< fa solid link >}} [Website](https://sites.google.com/site/indrajeetspatilmorality/)
-
-{{< fa solid envelope >}} [E-mail](mailto:patilindrajeet.science@gmail.com)
+:::
