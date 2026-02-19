@@ -20,7 +20,7 @@ keywords = [
 dependencies = ["jupyter>=1.0.0", "ipykernel>=6.29.0", "matplotlib>=3.8.0"]
 
 [tool.uv]
-required-version = ">=0.9.15"
+required-version = ">=0.10.2"
 
 [dependency-groups]
 dev = []
