@@ -133,12 +133,12 @@ greet(42);  // Error at compile time
 ::: {style="font-size: 1.1em;"}
 ```python
 def greet(name: str) -> str:
-    return f"Hello, {name}!"
+    return f"Hello, {name.upper()}!"
 
-# Runs fine, even with wrong type
-greet(42)          # "Hello, 42!"
-# Type error only if you use string methods
-greet(42).upper()  # Runtime error!
+# Works with correct type
+greet("alice")  # "Hello, ALICE!"
+# Wrong type fails at runtime
+greet(42)       # Runtime error: 'int' object has no attribute 'upper'
 ```
 :::
 
@@ -1274,7 +1274,7 @@ def process_user(user: UserV2) -> str:
 def old_process_user(user: UserV2) -> str:
     if user.role == "admin":
         return "admin"
-    # Type checker warns: missing cases!
+  # With strict type-checker settings, missing cases are flagged.
     return "user"
 ```
 
@@ -1332,8 +1332,8 @@ function oldProcessUser(user: UserV2): string {
   if (user.role === "admin") {
     return "admin";
   }
-  // TypeScript warns: missing cases!
-  return "user";
+  const exhaustiveCheck: never = user.role;
+  return exhaustiveCheck;
 }
 ```
 
@@ -1344,7 +1344,7 @@ function oldProcessUser(user: UserV2): string {
 :::
 
 ::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-**Single update, everywhere**: Change the schema once, type errors guide you to update all code!
+**Single update, minimal drift**: Update the schema once, then propagate via shared schemas or code generation.
 :::
 
 # Testing
@@ -1421,8 +1421,8 @@ def test_user_permissions():
                 age=25, role="user")
     assert not user.has_permission("delete_users")
 
-# Validation is tested by Pydantic itself
-# No need for 50+ validation tests!
+# Core validator behavior is covered by Pydantic itself.
+# Focus tests on business logic, custom validators, and edge cases.
 ```
 
 :::
@@ -1511,7 +1511,8 @@ describe("User permissions", () => {
   });
 });
 
-// Validation is tested by Zod itself!
+// Core validator behavior is covered by Zod itself.
+// Focus tests on business logic, custom refinements, and edge cases.
 ```
 
 :::
@@ -1972,7 +1973,7 @@ if (!result2.success) {
 :::
 
 ::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-**Strict typing**: No loose coercion that attackers can exploit!
+**Boundary hardening**: Use strict schemas at trust boundaries; coerce only when intentional.
 :::
 
 ## Size & Range Limits {.smaller}
@@ -2123,7 +2124,7 @@ curl -X POST /api/users -d '{
 }'
 ```
 
-**Result**: Privilege escalation, mass assignment, SQL injection
+**Result**: Privilege escalation and mass assignment risk; injection risk still requires parameterized queries.
 
 :::
 
@@ -2209,7 +2210,7 @@ async function submitUser(data: unknown) {
 - ✅ Instant feedback
 - ✅ Better UX
 - ✅ Reduced server load
-- ✅ Works offline
+- ✅ Can still provide local feedback during poor connectivity
 
 **Not for security!**
 
@@ -2268,6 +2269,12 @@ def create_user(user: UserCreate):
 ::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 
 **Defense in depth**: Client for UX, server for security. Both are essential.
+
+:::
+
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 12px; text-align: center; font-size: 0.85em;"}
+
+**Practical rule**: Use permissive parsing only at ingestion boundaries, then convert to strict internal models and fail closed on unknown fields.
 
 :::
 
@@ -2658,7 +2665,7 @@ function connectDb() {
 
 - ✅ **Validate once at startup**, use everywhere without re-checking
 - ✅ **Prevent accidental mutations** that could break application state
-- ✅ **Thread-safe** - no risk of concurrent modifications
+- ✅ **Improves safety in concurrent code** by removing shared mutable config
 
 :::
 
@@ -2807,7 +2814,7 @@ const user = UserSchema.parse(data);  // ← One line replaces 50+ lines
 :::
 
 ::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-**Less code, more confidence**: Reduce boilerplate by 90% while improving safety!
+**Less code, more confidence**: Can significantly reduce boilerplate while improving safety.
 :::
 
 # Summary
