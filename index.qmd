@@ -173,12 +173,9 @@ Ensuring data meets specific criteria before use.
 
 Manual checks scattered throughout code:
 
-- Type checking (`isinstance`, `typeof`)
-- Range validation (`age >= 18`)
-- Format validation (email regex, URL patterns)
-- Custom business rules
+- Type, range, and format checks written by hand
 - Logic spreads across codebase
-- Difficult to maintain
+- Difficult to maintain and extend
 
 :::
 
@@ -194,11 +191,9 @@ Manual checks scattered throughout code:
 
 Schemas automatically validate, parse, and type data:
 
-- Centralized validation rules
-- Self-documenting structures
+- Centralized, self-documenting rules
 - Automatic type coercion
 - Detailed error messages
-- Runtime type safety
 - Easier to maintain and evolve
 
 :::
@@ -588,14 +583,15 @@ class User(BaseModel):
 **✅ Best: `AcmeEmailStr`**
 
 ```python
-from pydantic import field_validator
+from typing import Annotated
+from pydantic import AfterValidator, EmailStr
 
-class AcmeEmailStr(EmailStr):
-    @field_validator('email')
-    def must_be_acme(cls, value):
-        if not value.endswith('@acme.com'):
-            raise ValueError('Must be @acme.com')
-        return value
+def must_be_acme(value: str) -> str:
+    if not value.endswith('@acme.com'):
+        raise ValueError('Must be @acme.com')
+    return value
+
+AcmeEmailStr = Annotated[EmailStr, AfterValidator(must_be_acme)]
 
 class User(BaseModel):
     email: AcmeEmailStr
@@ -1992,21 +1988,15 @@ if (!result2.success) {
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field, field_validator
+from typing import Annotated
+from pydantic import BaseModel, Field
 
 class CommentSubmission(BaseModel):
     post_id: str
     author: str = Field(min_length=1, max_length=50)
     content: str = Field(min_length=1, max_length=5000)
-    tags: list[str] = Field(max_length=10)
+    tags: list[Annotated[str, Field(max_length=30)]] = Field(max_length=10)
     rating: int = Field(ge=1, le=5)
-
-    @field_validator('tags')
-    @classmethod
-    def validate_tag_length(cls, tags):
-        if any(len(tag) > 30 for tag in tags):
-            raise ValueError('Tag too long')
-        return tags
 ```
 
 :::
@@ -2669,8 +2659,6 @@ function connectDb() {
 - ✅ **Validate once at startup**, use everywhere without re-checking
 - ✅ **Prevent accidental mutations** that could break application state
 - ✅ **Thread-safe** - no risk of concurrent modifications
-- ✅ **Clearer intent** - signals this data is meant to be constant
-- ✅ **Performance** - no validation overhead after initial parse
 
 :::
 
@@ -2843,10 +2831,6 @@ Data validation libraries like Pydantic and Zod transform how we build applicati
 **Testing**: Reduce test burden and generate mock data easily
 
 **Security**: Prevent injection, mass assignment, and DoS attacks
-
-**Maintainability**: Update once, changes propagate everywhere
-
-**Developer Experience**: Less boilerplate, better IDE support, faster onboarding
 
 :::
 
