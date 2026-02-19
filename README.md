@@ -42,6 +42,19 @@ just check     # Check Quarto and Python setup
 just           # Install, render, and open slides (default)
 ```
 
+## GitHub Pages deployment (automatic)
+
+This repository uses GitHub Actions to render the slides and deploy the rendered `_site/` directory to GitHub Pages.
+
+One-time repository setting:
+
+1. Go to **Settings → Pages**
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**
+
+After that, every push to `main`/`master` deploys automatically.
+
+Why this fixes missing CSS/JS (404): the workflow uploads the rendered site as a Pages artifact, so deployment does not depend on tracked files or `.gitignore` rules.
+
 # Feedback
 
 I'd love to hear thoughts and comments [here](https://github.com/IndrajeetPatil/parse-dont-pray/issues).

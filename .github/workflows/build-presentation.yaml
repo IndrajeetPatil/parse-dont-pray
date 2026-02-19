@@ -1,4 +1,4 @@
-name: Build Presentation
+name: Build and Deploy Presentation
 
 on:
   push:
@@ -8,14 +8,10 @@ on:
 
 jobs:
   build-presentation:
-    runs-on: macos-latest
-    permissions:
-      contents: write
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -25,24 +21,57 @@ jobs:
 
       - name: Setup Quarto
         uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Setup Pandoc (latest)
+        uses: r-lib/actions/setup-pandoc@v2
         with:
-          version: pre-release
+          pandoc-version: latest
+
+      - name: Setup Chrome (for Mermaid PNG rendering)
+        uses: browser-actions/setup-chrome@v1
 
       - name: Install Quarto extensions
         run: |
           quarto --version
+          pandoc --version | head -n 1
+          google-chrome --version
           quarto install extension quarto-ext/fontawesome --no-prompt
 
       - name: Install dependencies
         run: uv sync --frozen --no-install-project
 
       - name: Render slides
-        run: uv run --no-project quarto render index.qmd --execute-daemon-restart
+        run: |
+          PANDOC_DIR="$(dirname "$(command -v pandoc)")"
+          BROWSER_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
 
-      - name: Deploy to GitHub pages 🚀
+          if [ -n "$BROWSER_BIN" ]; then
+            export PUPPETEER_EXECUTABLE_PATH="$BROWSER_BIN"
+          fi
+
+          QUARTO_PANDOC="$PANDOC_DIR" uv run --no-project quarto render
+
+      - name: Configure GitHub Pages
         if: github.event_name != 'pull_request'
-        uses: JamesIves/github-pages-deploy-action@v4.7.4
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
         with:
-          branch: docs
-          folder: .
-          clean: true
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build-presentation
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
