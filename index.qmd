@@ -1374,104 +1374,43 @@ Validation testing is delegated to the well-tested library!
 
 ### Python (Pydantic + Hypothesis)
 
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
 ```python
 from pydantic import *
+from hypothesis import given
 from hypothesis.strategies import builds
-from pydantic_factories import ModelFactory
 
 class Product(BaseModel):
-    product_id: str = Field(pattern=r'^PROD-\d+$')
     name: str = Field(min_length=1, max_length=100)
     price: PositiveFloat = Field(le=10000)
-    in_stock: bool
 
-class ProductFactory(ModelFactory):
-    __model__ = Product
-```
-
-:::
-
-::: {.column width="50%"}
-
-**Test Data Generation**
-
-```python
-# Hypothesis auto-generates valid instances
+# Hypothesis auto-generates valid instances from the schema
 @given(builds(Product))
 def test_product_discount(product):
     discounted = apply_discount(product, 0.1)
     assert discounted.price < product.price
-    assert discounted.product_id == product.product_id
-
-# Factory generates test data easily
-def test_bulk_operations():
-    products = [ProductFactory.build() for _ in range(100)]
-    result = bulk_update_inventory(products)
-    assert len(result) == 100
 ```
 
-:::
-
-::::
-
 ### TypeScript (Zod + Faker)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
 
 ```typescript
 import { z } from "zod";
 import { faker } from "@faker-js/faker";
 
 const ProductSchema = z.object({
-  productId: z.string().regex(/^PROD-\d+$/),
   name: z.string().min(1).max(100),
   price: z.number().positive().max(10000),
-  inStock: z.boolean(),
 });
 
 type Product = z.infer<typeof ProductSchema>;
-```
 
-:::
-
-::: {.column width="50%"}
-
-**Test Data Generation**
-
-```typescript
-// Helper generates valid Product
+// Faker generates valid test data matching the schema
 function generateProduct(): Product {
   return ProductSchema.parse({
-    productId: `PROD-${faker.number.int({ min: 1000, max: 9999 })}`,
     name: faker.commerce.productName(),
     price: faker.number.float({ min: 0.01, max: 10000 }),
-    inStock: faker.datatype.boolean(),
   });
 }
-
-// Use in tests
-describe("Product operations", () => {
-  it("applies discount correctly", () => {
-    const product = generateProduct();
-    const discounted = applyDiscount(product, 0.1);
-    expect(discounted.price).toBeLessThan(product.price);
-  });
-});
 ```
-
-:::
-
-::::
 
 :::
 
