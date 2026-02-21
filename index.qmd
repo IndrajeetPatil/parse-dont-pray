@@ -1813,134 +1813,25 @@ Client for UX, server for security. Both are essential. Matching schemas on both
 
 ## API Design & Documentation {.smaller}
 
-::: {.panel-tabset}
+One schema drives validation, types, **and** documentation.
 
-### Python (FastAPI + Pydantic)
+```{mermaid}
+%%| fig-width: 9
+flowchart LR
+    S["🔷 <b>Schema</b><br/><i>Pydantic / Zod</i>"]
+    S --> V["✅ <b>Request &<br/>Response Validation</b>"]
+    S --> T["🔒 <b>Type Safety</b><br/><i>IDE autocomplete</i>"]
+    S --> D["📄 <b>OpenAPI / JSON Schema</b>"]
+    D --> UI["🌐 <b>Interactive Docs</b><br/><i>/docs &bull; Swagger UI</i>"]
+    D --> CG["⚙️ <b>Client Code<br/>Generation</b>"]
 
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
-```python
-from pydantic import *
-from typing import Annotated
-
-UserName = Annotated[str, Field(min_length=3, max_length=20)]
-
-class User(BaseModel):
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "user_id": "USR-123",
-                "email": "john@example.com",
-                "username": "johndoe",
-                "is_active": True
-            }
-        }
-    )
-
-    user_id: str = Field(description="Unique user identifier")
-    email: EmailStr = Field(description="User's email address")
-    username: UserName
-    is_active: bool = Field(default=True)
+    style S fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+    style V fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    style T fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    style D fill:#fff3e0,stroke:#e65100,color:#bf360c
+    style UI fill:#fce4ec,stroke:#c62828,color:#b71c1c
+    style CG fill:#fce4ec,stroke:#c62828,color:#b71c1c
 ```
-
-:::
-
-::: {.column width="50%"}
-
-**FastAPI Endpoint**
-
-```python
-from fastapi import FastAPI
-
-app = FastAPI(title="User API")
-
-@app.post("/users", response_model=User,
-          summary="Create new user",
-          description="Creates a new user with validated data")
-def create_user(user: User) -> User:
-    # FastAPI automatically:
-    # - Validates request body
-    # - Generates OpenAPI/Swagger docs
-    # - Provides interactive docs at /docs
-    return user
-
-# Visit /docs for auto-generated documentation!
-# Schema validation = API docs, always in sync!
-```
-
-:::
-
-::::
-
-### TypeScript (Express + Zod)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
-```typescript
-import { z } from "zod";
-import { generateSchema } from "@anatine/zod-openapi";
-
-const UserName = z.string().min(3).max(20);
-
-const UserSchema = z.object({
-  userId: z.string().describe("Unique user identifier"),
-  email: z.string().email().describe("User's email address"),
-  username: UserName,
-  isActive: z.boolean().default(true),
-}).openapi({
-  example: {
-    userId: "USR-123",
-    email: "john@example.com",
-    username: "johndoe",
-    isActive: true,
-  },
-});
-
-type User = z.infer<typeof UserSchema>;
-```
-
-:::
-
-::: {.column width="50%"}
-
-**Express Endpoint**
-
-```typescript
-import express from "express";
-
-const app = express();
-
-app.post("/users", (req, res) => {
-  // Validate request body
-  const result = UserSchema.safeParse(req.body);
-
-  if (!result.success) {
-    return res.status(400).json({ errors: result.error.format() });
-  }
-
-  const user: User = result.data;
-  // ... create user
-  res.json(user);
-});
-
-// Generate OpenAPI spec from Zod schemas
-const openApiSchema = generateSchema(UserSchema);
-// Use with swagger-ui-express for docs
-```
-
-:::
-
-::::
-
-:::
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 API docs generated from schemas, always accurate!
