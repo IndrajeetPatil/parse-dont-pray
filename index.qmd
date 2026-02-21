@@ -1728,7 +1728,7 @@ Limit input sizes to prevent memory/storage exhaustion attacks!
 
 # Full-Stack Validation
 
-*Client + Server validation for security and UX*
+*Client + Server validation for UX and security*
 
 ## Why Both Sides Matter {.smaller}
 
@@ -1764,7 +1764,9 @@ curl -X POST /api/users -d '{
 }'
 ```
 
-**Result**: Privilege escalation and mass assignment risk; injection risk still requires parameterized queries.
+**Result**: Privilege escalation and mass assignment risk.
+
+**Lesson**: Client validation is for **UX**, not security. Matching schemas on both sides act as a **contract test** – catching API mismatches at runtime.
 
 :::
 
@@ -1800,19 +1802,15 @@ class User(BaseModel):
 3. "Age too low" → fix → wait 200ms
 4. Finally succeeds after 3 round trips
 
-**Result**: Frustration, poor UX, abandoned forms
+**Result**: Frustration, poor UX, abandoned forms.
+
+**Lesson**: Server validation is **mandatory** for security, but without client validation, UX suffers.
 
 :::
 
 :::
 
 ::::
-
-::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-
-Client for UX, server for security. Both are essential. Matching schemas on both sides act as a **contract test** – catching API mismatches at runtime.
-
-:::
 
 # Additional Benefits
 
