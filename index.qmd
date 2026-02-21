@@ -621,22 +621,19 @@ class ProductPrice(BaseModel):
 **Validation Examples**
 
 ```python
-# Valid data passes through
-valid_product = ProductPrice(
+# ✅ Valid data passes through
+ProductPrice(
     product_id="PROD-123",
     price=29.99,
     currency="USD"
 )
 
-# Invalid data raises detailed error
-try:
-    invalid_product = ProductPrice(
-        product_id="PROD-123",
-        price=-10,     # Negative!
-        currency="US"  # Invalid format!
-    )
-except ValidationError as e:
-    print(e.json())
+# 🚫 Invalid data blocked
+ProductPrice(
+    product_id="PROD-123",
+    price=-10,     # Negative!
+    currency="US"  # Invalid format!
+)
 ```
 
 :::
@@ -668,23 +665,19 @@ const ProductPriceSchema = z.object({
 **Validation Examples**
 
 ```typescript
-// Valid data passes through
-const validProduct = ProductPriceSchema.parse({
+// ✅ Valid data passes through
+ProductPriceSchema.parse({
   productId: "PROD-123",
   price: 29.99,
   currency: "USD",
 });
 
-// Invalid data throws detailed error
-try {
-  const invalidProduct = ProductPriceSchema.parse({
-    productId: "PROD-123",
-    price: -10,     // Negative!
-    currency: "US", // Invalid format!
-  });
-} catch (error) {
-  console.error(error.errors);
-}
+// 🚫 Invalid data blocked
+ProductPriceSchema.parse({
+  productId: "PROD-123",
+  price: -10,     // Negative!
+  currency: "US", // Invalid format!
+});
 ```
 
 :::
@@ -913,7 +906,6 @@ Specific, actionable feedback about what's wrong and where.
 
 ```python
 from pydantic import BaseModel
-from typing import Optional
 
 class Address(BaseModel):
     street: str
@@ -925,7 +917,7 @@ class Person(BaseModel):
     name: str
     age: int
     address: Address
-    phone: Optional[str] = None
+    phone: str | None = None
 ```
 
 :::
@@ -1034,11 +1026,10 @@ const city: string = getPersonCity(person);
 
 ```python
 from pydantic import BaseModel, Field
-from typing import List
 
 class ApiResponse(BaseModel):
     status: str = Field(pattern=r'^(success|error)$')
-    data: List[dict]
+    data: list[dict]
     message: str
 ```
 
@@ -1685,22 +1676,15 @@ class UserUpdate(BaseModel):
 **Mass Assignment Prevention**
 
 ```python
-# Malicious request
-malicious_data = {
-    "email": "hacker@evil.com",
-    "is_admin": True,  # Attack!
-    "balance": 999999,  # Attack!
-}
+# ✅ Safe request
+UserUpdate(email="user@example.com")
 
-try:
-    user_update = UserUpdate(**malicious_data)
-except ValidationError as e:
-    print("Attack prevented!")
-
-# Safe version
-safe_data = {"email": "hacker@evil.com"}
-user_update = UserUpdate(**safe_data)
-# Malicious fields rejected
+# 🚫 Malicious fields blocked
+UserUpdate(
+    email="hacker@evil.com",
+    is_admin=True,   # Attack!
+    balance=999999,  # Attack!
+)
 ```
 
 :::
@@ -1730,23 +1714,15 @@ const UserUpdateSchema = z.strictObject({
 **Mass Assignment Prevention**
 
 ```typescript
-// Malicious request
-const maliciousData = {
+// ✅ Safe request
+UserUpdateSchema.parse({ email: "user@example.com" });
+
+// 🚫 Malicious fields blocked
+UserUpdateSchema.parse({
   email: "hacker@evil.com",
-  isAdmin: true,  // Attack!
+  isAdmin: true,    // Attack!
   balance: 999999,  // Attack!
-};
-
-try {
-  const userUpdate = UserUpdateSchema.parse(maliciousData);
-} catch (error) {
-  console.log("Attack prevented!");
-}
-
-// Safe version
-const safeData = { email: "hacker@evil.com" };
-const userUpdate = UserUpdateSchema.parse(safeData);
-// Malicious fields rejected
+});
 ```
 
 :::
@@ -1787,29 +1763,26 @@ class PaymentRequest(BaseModel):
 **Type Confusion Prevention**
 
 ```python
-# Attack: String instead of float
-attack_data = {
-    "user_id": "USR-123",
-    "amount": "0.01 OR 1=1",  # Attack!
-    "currency": "USD"
-}
+# ✅ Valid payment
+PaymentRequest(
+    user_id="USR-123",
+    amount=10.0,
+    currency="USD"
+)
 
-try:
-    payment = PaymentRequest(**attack_data)
-except ValidationError:
-    print("Attack blocked!")
+# 🚫 String instead of float blocked
+PaymentRequest(
+    user_id="USR-123",
+    amount="0.01 OR 1=1",  # Attack!
+    currency="USD"
+)
 
-# Attack: Array instead of string
-attack_data2 = {
-    "user_id": ["USR-123", "ADMIN"],  # Attack!
-    "amount": 10.0,
-    "currency": "USD"
-}
-
-try:
-    payment = PaymentRequest(**attack_data2)
-except ValidationError:
-    print("Attack blocked!")
+# 🚫 Array instead of string blocked
+PaymentRequest(
+    user_id=["USR-123", "ADMIN"],  # Attack!
+    amount=10.0,
+    currency="USD"
+)
 ```
 
 :::
@@ -1841,29 +1814,26 @@ const PaymentRequestSchema = z.object({
 **Type Confusion Prevention**
 
 ```typescript
-// Attack: String instead of number
-const attackData = {
+// ✅ Valid payment
+PaymentRequestSchema.parse({
+  userId: "USR-123",
+  amount: 10.0,
+  currency: "USD",
+});
+
+// 🚫 String instead of number blocked
+PaymentRequestSchema.parse({
   userId: "USR-123",
   amount: "0.01 OR 1=1",  // Attack!
-  currency: "USD"
-};
+  currency: "USD",
+});
 
-const result = PaymentRequestSchema.safeParse(attackData);
-if (!result.success) {
-  console.log("Attack blocked!");
-}
-
-// Attack: Array instead of string
-const attackData2 = {
+// 🚫 Array instead of string blocked
+PaymentRequestSchema.parse({
   userId: ["USR-123", "ADMIN"],  // Attack!
   amount: 10.0,
-  currency: "USD"
-};
-
-const result2 = PaymentRequestSchema.safeParse(attackData2);
-if (!result2.success) {
-  console.log("Attack blocked!");
-}
+  currency: "USD",
+});
 ```
 
 :::
@@ -1907,23 +1877,18 @@ class CommentSubmission(BaseModel):
 **DoS Attack Prevention**
 
 ```python
-# Attack: Massive content
-dos_attack = {
-    "post_id": "POST-123",
-    "author": "attacker",
-    "content": "X" * 1_000_000,  # 1MB!
-    "tags": ["spam"] * 1000,  # 1000 tags!
-    "rating": 999  # Out of range
-}
-
-try:
-    comment = CommentSubmission(**dos_attack)
-except ValidationError as e:
-    print("DoS attack prevented!")
-    # Errors:
-    # - content: max 5000 characters
-    # - tags: max 10 items
-    # - rating: max 5
+# 🚫 Massive content blocked
+CommentSubmission(
+    post_id="POST-123",
+    author="attacker",
+    content="X" * 1_000_000,  # 1MB!
+    tags=["spam"] * 1000,     # 1000 tags!
+    rating=999                # Out of range!
+)
+# Errors:
+# - content: max 5000 characters
+# - tags: max 10 items
+# - rating: max 5
 ```
 
 :::
@@ -1957,23 +1922,18 @@ const CommentSubmissionSchema = z.object({
 **DoS Attack Prevention**
 
 ```typescript
-// Attack: Massive content
-const dosAttack = {
+// 🚫 Massive content blocked
+CommentSubmissionSchema.parse({
   postId: "POST-123",
   author: "attacker",
   content: "X".repeat(1_000_000),  // 1MB!
   tags: Array(1000).fill("spam"),  // 1000 tags!
-  rating: 999  // Out of range
-};
-
-const result = CommentSubmissionSchema.safeParse(dosAttack);
-if (!result.success) {
-  console.log("DoS attack prevented!");
-  // Errors:
-  // - content: max 5000 character(s)
-  // - tags: max 10 element(s)
-  // - rating: max 5
-}
+  rating: 999,                     // Out of range!
+});
+// Errors:
+// - content: max 5000 character(s)
+// - tags: max 10 element(s)
+// - rating: max 5
 ```
 
 :::
