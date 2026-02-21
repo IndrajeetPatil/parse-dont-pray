@@ -2023,261 +2023,43 @@ const openApiSchema = generateSchema(UserSchema);
 API docs generated from schemas, always accurate!
 :::
 
-## Data Transformation {.smaller}
-
-::: {.panel-tabset}
-
-### Python (Pydantic)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
-```python
-from pydantic import *
-from datetime import datetime
-
-class BlogPost(BaseModel):
-    title: str
-    slug: str
-    published_at: datetime
-    tags: list[str]
-    view_count: int = 0
-
-    @model_validator(mode='before')
-    @classmethod
-    def generate_slug(cls, values):
-        if not values.get('slug') and 'title' in values:
-            values['slug'] = values['title'].lower().replace(' ', '-')
-        return values
-
-    @field_serializer('published_at')
-    def serialize_datetime(self, value: datetime) -> str:
-        return value.isoformat()
-```
-
-:::
-
-::: {.column width="50%"}
-
-**Transformation Examples**
-
-```python
-# Parse with transformations
-post = BlogPost(
-    title="My Blog Post",
-    slug="",                              # Auto-generated
-    published_at="2024-01-15T10:30:00",   # String → datetime
-    tags=["python", "fastapi", "pydantic"]
-)
-
-print(post.slug)  # "my-blog-post"
-print(post.published_at)  # datetime object
-
-# Serialize back to JSON
-print(post.model_dump_json())
-# {"title":"My Blog Post","slug":"my-blog-post",...}
-```
-
-:::
-
-::::
-
-### TypeScript (Zod)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
-```typescript
-import { z } from "zod";
-
-const BlogPostSchema = z.object({
-  title: z.string(),
-  slug: z.string().transform((val, ctx) => {
-    return val || ctx.path[0].toString().toLowerCase().replace(/\s+/g, "-");
-  }),
-  publishedAt: z.coerce.date(),
-  tags: z.union([
-    z.array(z.string()),
-    z.string().transform(s => s.split(","))
-  ]),
-  viewCount: z.number().default(0),
-});
-
-type BlogPost = z.infer<typeof BlogPostSchema>;
-```
-
-:::
-
-::: {.column width="50%"}
-
-**Transformation Examples**
-
-```typescript
-// Parse with transformations
-const post = BlogPostSchema.parse({
-  title: "My Blog Post",
-  slug: "",
-  publishedAt: "2024-01-15T10:30:00Z",  // String → Date
-  tags: "python,fastapi,pydantic",  // String → Array
-});
-
-console.log(post.slug);  // "my-blog-post" (auto-generated)
-console.log(post.publishedAt);  // Date object
-console.log(post.tags);  // ["python", "fastapi", "pydantic"]
-
-// Serialize back to JSON
-console.log(JSON.stringify(post));
-```
-
-:::
-
-::::
-
-:::
-
-::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Parse, normalize, and serialize complex data automatically!
-:::
-
 ## Immutable Configs: Validate Once, Done {.smaller}
 
 ::: {.panel-tabset}
 
 ### Python (Pydantic)
 
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
 ```python
 from pydantic import *
 
-class DatabaseConfig(BaseModel):
+class AppConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    host: str
-    port: int = Field(ge=1, le=65535)
-    database: str
-    max_connections: int = Field(ge=1, le=100)
-    timeout_seconds: int = Field(ge=1)
+    api_key: str
+    max_retries: int = Field(ge=1, le=10)
 
-# Validated once at startup
-db_config = DatabaseConfig(
-    host="localhost",
-    port=5432,
-    database="myapp",
-    max_connections=20,
-    timeout_seconds=30
-)
+config = AppConfig(api_key="sk-123", max_retries=3)
+config.max_retries = 5  # 🚫 ValidationError: frozen instance
 ```
-
-:::
-
-::: {.column width="50%"}
-
-**Immutability Benefits**
-
-```python
-# Guaranteed valid throughout lifecycle
-# Attempts to modify raise an error
-try:
-    db_config.port = 9999
-except ValidationError as e:
-    print("Config is immutable!")
-
-# Use confidently without re-validation
-def connect_db():
-    connection = psycopg2.connect(
-        host=db_config.host,      # Always valid
-        port=db_config.port,      # Always 1-65535
-        database=db_config.database
-    )
-```
-
-:::
-
-::::
 
 ### TypeScript (Zod)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
 
 ```typescript
 import { z } from "zod";
 
-const DatabaseConfigSchema = z.object({
-  host: z.string(),
-  port: z.number().int().min(1).max(65535),
-  database: z.string(),
-  maxConnections: z.number().int().min(1).max(100),
-  timeoutSeconds: z.number().int().min(1),
-}).readonly();  // Immutable after creation
+const AppConfigSchema = z.object({
+  apiKey: z.string(),
+  maxRetries: z.number().int().min(1).max(10),
+}).readonly();
 
-type DatabaseConfig = z.infer<typeof DatabaseConfigSchema>;
-
-// Validated once at startup
-const dbConfig = DatabaseConfigSchema.parse({
-  host: "localhost",
-  port: 5432,
-  database: "myapp",
-  maxConnections: 20,
-  timeoutSeconds: 30,
-}) as Readonly<DatabaseConfig>;
+const config = AppConfigSchema.parse({ apiKey: "sk-123", maxRetries: 3 });
+config.maxRetries = 5;  // 🚫 Compile error: readonly property
 ```
 
 :::
 
-::: {.column width="50%"}
-
-**Immutability Benefits**
-
-```typescript
-// Guaranteed valid throughout lifecycle
-// TypeScript prevents modification
-try {
-  dbConfig.port = 9999;  // Compile error!
-} catch (error) {
-  console.log("Config is immutable!");
-}
-
-// Use confidently without re-validation
-function connectDb() {
-  const connection = createConnection({
-    host: dbConfig.host,      // Always valid
-    port: dbConfig.port,      // Always 1-65535
-    database: dbConfig.database
-  });
-}
-```
-
-:::
-
-::::
-
-:::
-
-. . .
-
-::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 0.85em;"}
-
-**Benefits of frozen/immutable configs**:
-
-- ✅ **Validate once at startup**, use everywhere without re-checking
-- ✅ **Prevent accidental mutations** that could break application state
-- ✅ **Improves safety in concurrent code** by removing shared mutable config
-
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+Validate once at startup, use confidently everywhere without re-checking.
 :::
 
 # Summary
