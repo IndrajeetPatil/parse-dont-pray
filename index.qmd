@@ -1265,29 +1265,15 @@ Update the schema once, then propagate via shared schemas or code generation.
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
 
 ```python
-# Need extensive tests for every validation rule
-def test_user_validation():
-    # Test username length
-    with pytest.raises(ValueError):
-        create_user(username="ab")  # Too short
-    with pytest.raises(ValueError):
-        create_user(username="a" * 21)  # Too long
-
-    # Test email format
+# Need tests for every validation rule
+def test_signup_validation():
     with pytest.raises(ValueError):
         create_user(email="invalid")
-
-    # Test age range
     with pytest.raises(ValueError):
-        create_user(age=17)  # Too young
+        create_user(age=17)
     with pytest.raises(ValueError):
-        create_user(age=121)  # Too old
-
-    # Test role enum
-    with pytest.raises(ValueError):
-        create_user(role="superuser")  # Invalid
-
-    # ... 50+ more validation tests
+        create_user(age=121)
+    # ... more validation tests
 ```
 
 :::
@@ -1301,29 +1287,18 @@ def test_user_validation():
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
 ```python
-from typing import Annotated, Literal
-from pydantic import BaseModel, Field, EmailStr
-
-UserName = Annotated[str, Field(min_length=3, max_length=20)]
+from pydantic import BaseModel, EmailStr, Field
 
 class User(BaseModel):
-    username: UserName
     email: EmailStr
     age: int = Field(ge=18, le=120)
-    role: Literal["user", "admin", "guest"]
 
 # Only test business logic, not validation
 def test_user_permissions():
-    admin = User(username="admin", email="admin@test.com",
-                 age=30, role="admin")
+    admin = User(email="a@test.com", age=30)
     assert admin.has_permission("delete_users")
 
-    user = User(username="user", email="user@test.com",
-                age=25, role="user")
-    assert not user.has_permission("delete_users")
-
-# Core validator behavior is covered by Pydantic itself.
-# Focus tests on business logic, custom validators, and edge cases.
+# Validation is covered by Pydantic itself.
 ```
 
 :::
@@ -1343,31 +1318,17 @@ def test_user_permissions():
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
 
 ```typescript
-// Need extensive tests for every validation rule
+// Need tests for every validation rule
 describe("User validation", () => {
-  // Test username length
-  it("rejects short username", () => {
-    expect(() => createUser({ username: "ab" }))
-      .toThrow();
-  });
-  it("rejects long username", () => {
-    expect(() => createUser({ username: "a".repeat(21) }))
-      .toThrow();
-  });
-
-  // Test email format
   it("rejects invalid email", () => {
     expect(() => createUser({ email: "invalid" }))
       .toThrow();
   });
-
-  // Test age range
   it("rejects young age", () => {
     expect(() => createUser({ age: 17 }))
       .toThrow();
   });
-
-  // ... 50+ more validation tests
+  // ... more validation tests
 });
 ```
 
@@ -1384,13 +1345,9 @@ describe("User validation", () => {
 ```typescript
 import { z } from "zod";
 
-const UserName = z.string().min(3).max(20);
-
 const UserSchema = z.object({
-  username: UserName,
   email: z.string().email(),
   age: z.number().min(18).max(120),
-  role: z.enum(["user", "admin", "guest"]),
 });
 
 type User = z.infer<typeof UserSchema>;
@@ -1399,23 +1356,13 @@ type User = z.infer<typeof UserSchema>;
 describe("User permissions", () => {
   it("admin has delete permission", () => {
     const admin = UserSchema.parse({
-      username: "admin", email: "admin@test.com",
-      age: 30, role: "admin"
+      email: "a@test.com", age: 30,
     });
     expect(admin.hasPermission("delete_users")).toBe(true);
   });
-
-  it("user lacks delete permission", () => {
-    const user = UserSchema.parse({
-      username: "user", email: "user@test.com",
-      age: 25, role: "user"
-    });
-    expect(user.hasPermission("delete_users")).toBe(false);
-  });
 });
 
-// Core validator behavior is covered by Zod itself.
-// Focus tests on business logic, custom refinements, and edge cases.
+// Validation is covered by Zod itself.
 ```
 
 :::
@@ -1539,122 +1486,6 @@ describe("Product operations", () => {
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 Generate hundreds of valid test cases from your schema!
-:::
-
-## Contract Testing {.smaller}
-
-::: {.panel-tabset}
-
-### Python Backend (Pydantic)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
-```python
-# backend/schemas/user.py
-from pydantic import BaseModel, EmailStr, ConfigDict
-from datetime import datetime
-
-class UserResponse(BaseModel):
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "user_id": "USR-123",
-                "email": "user@example.com",
-                "username": "johndoe",
-                "created_at": "2024-01-15T10:30:00Z",
-                "is_verified": True
-            }
-        }
-    )
-
-    user_id: str
-    email: EmailStr
-    username: str
-    created_at: datetime
-    is_verified: bool
-```
-
-:::
-
-::: {.column width="50%"}
-
-**FastAPI Endpoint**
-
-```python
-# FastAPI generates OpenAPI spec automatically
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/users/{user_id}", response_model=UserResponse)
-def get_user(user_id: str) -> UserResponse:
-    # Response is automatically validated
-    return UserResponse(...)
-```
-
-:::
-
-::::
-
-### TypeScript Frontend (Zod)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
-```typescript
-// frontend/schemas/user.ts
-import { z } from "zod";
-
-// Mirror the backend contract
-export const UserResponseSchema = z.object({
-  user_id: z.string(),
-  email: z.string().email(),
-  username: z.string(),
-  created_at: z.coerce.date(),
-  is_verified: z.boolean(),
-});
-
-export type UserResponse = z.infer<typeof UserResponseSchema>;
-```
-
-:::
-
-::: {.column width="50%"}
-
-**API Client Usage**
-
-```typescript
-// API client with validated responses
-async function getUser(userId: string): Promise<UserResponse> {
-  const response = await fetch(`/api/users/${userId}`);
-  const json = await response.json();
-
-  // Validate backend returns expected structure
-  // Catches API contract violations!
-  return UserResponseSchema.parse(json);
-}
-
-// Usage with guaranteed type safety
-const user = await getUser("USR-123");
-console.log(user.username);  // TS knows exists
-console.log(user.created_at);  // TS knows is Date
-```
-
-:::
-
-::::
-
-:::
-
-::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Frontend and backend schemas ensure compatibility at runtime!
 :::
 
 # Security
@@ -2144,7 +1975,7 @@ def create_user(user: UserCreate):
 
 ::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 
-Client for UX, server for security. Both are essential.
+Client for UX, server for security. Both are essential. Matching schemas on both sides act as a **contract test** – catching API mismatches at runtime.
 
 :::
 
