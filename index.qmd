@@ -1425,7 +1425,8 @@ Generate hundreds of valid test cases from your schema!
 from pydantic import *
 
 class UserUpdate(BaseModel):
-    model_config = ConfigDict(extra='forbid')  # Rejects unknown fields
+    # Rejects unknown fields
+    model_config = ConfigDict(extra='forbid')
     email: str
 ```
 
@@ -1801,7 +1802,7 @@ API docs generated from schemas, always accurate!
 
 ### Python (Pydantic)
 
-```{.python code-line-numbers="4,8"}
+```{.python code-line-numbers="4,9"}
 from pydantic import *
 
 class AppConfig(BaseModel):
