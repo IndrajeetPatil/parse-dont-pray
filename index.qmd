@@ -706,11 +706,16 @@ from pydantic import *
 from datetime import datetime
 
 class Event(BaseModel):
-    event_id: int        # Coerces string to int
-    timestamp: datetime  # Parses ISO 8601 strings
-    is_public: bool      # Coerces to bool
-    attendees: list[str] # Coerces tuple to list
+    event_id: int        # <1>
+    timestamp: datetime  # <2>
+    is_public: bool      # <3>
+    attendees: list[str] # <4>
 ```
+
+1. Coerces string to `int`
+2. Parses ISO 8601 strings to `datetime`
+3. Coerces `"yes"` / `"no"` to `bool`
+4. Coerces tuple to `list`
 
 :::
 
@@ -719,19 +724,18 @@ class Event(BaseModel):
 **Coercion Examples**
 
 ```python
-# String inputs are intelligently coerced
 event = Event(
-    event_id="42",                    # → int 42
-    timestamp="2024-01-15T10:30:00",  # → datetime
-    is_public="yes",                  # → True
-    attendees=("Alice", "Bob")        # → list
+    event_id="42",                    # <1>
+    timestamp="2024-01-15T10:30:00",  # <2>
+    is_public="yes",                  # <3>
+    attendees=("Alice", "Bob")        # <4>
 )
-
-print(event.event_id)   # 42 (int)
-print(event.timestamp)  # datetime object
-print(event.is_public)  # True (bool)
-print(event.attendees)  # ["Alice", "Bob"]
 ```
+
+1. → `int` 42
+2. → `datetime` object
+3. → `True`
+4. → `list`
 
 :::
 
@@ -745,16 +749,19 @@ print(event.attendees)  # ["Alice", "Bob"]
 
 **Schema Definition**
 
-```typescript
+```{.typescript code-line-numbers="4,5"}
 import { z } from "zod";
 
 const EventSchema = z.object({
-  eventId: z.coerce.number(),   // Coerce to number
-  timestamp: z.coerce.date(),   // Parse to Date
+  eventId: z.coerce.number(),   // <1>
+  timestamp: z.coerce.date(),   // <2>
   isPublic: z.boolean(),
   attendees: z.array(z.string()),
 });
 ```
+
+1. `z.coerce` converts string input to `number`
+2. `z.coerce` parses string input to `Date`
 
 :::
 
@@ -763,19 +770,16 @@ const EventSchema = z.object({
 **Coercion Examples**
 
 ```typescript
-// String inputs are intelligently coerced
 const event = EventSchema.parse({
-  eventId: "42",                     // → number 42
-  timestamp: "2024-01-15T10:30:00",  // → Date
+  eventId: "42",                     // <1>
+  timestamp: "2024-01-15T10:30:00",  // <2>
   isPublic: true,
   attendees: ["Alice", "Bob"],
 });
-
-console.log(event.eventId);    // 42 (number)
-console.log(event.timestamp);  // Date object
-console.log(event.isPublic);   // true (boolean)
-console.log(event.attendees);  // ["Alice", "Bob"]
 ```
+
+1. → `number` 42
+2. → `Date` object
 
 :::
 
@@ -1434,13 +1438,15 @@ Generate hundreds of valid test cases from your schema!
 
 **Schema Definition**
 
-```python
+```{.python code-line-numbers="4"}
 from pydantic import *
 
 class UserUpdate(BaseModel):
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra='forbid')  # <1>
     email: str
 ```
+
+1. Rejects any fields not defined in the schema
 
 :::
 
@@ -1472,13 +1478,15 @@ UserUpdate(
 
 **Schema Definition**
 
-```typescript
+```{.typescript code-line-numbers="3"}
 import { z } from "zod";
 
-const UserUpdateSchema = z.strictObject({
+const UserUpdateSchema = z.strictObject({  // <1>
   email: z.string().email(),
 });
 ```
+
+1. Rejects any fields not defined in the schema
 
 :::
 
@@ -1816,6 +1824,7 @@ Client for UX, server for security. Both are essential. Matching schemas on both
 One schema drives validation, types, **and** documentation.
 
 ```{mermaid}
+%%| eval: true
 %%| fig-width: 9
 flowchart LR
     S["🔷 <b>Schema</b><br/><i>Pydantic / Zod</i>"]
@@ -1843,32 +1852,36 @@ API docs generated from schemas, always accurate!
 
 ### Python (Pydantic)
 
-```python
+```{.python code-line-numbers="4,8"}
 from pydantic import *
 
 class AppConfig(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True)  # <1>
 
     api_key: str
     max_retries: int = Field(ge=1, le=10)
 
-config = AppConfig(api_key="sk-123", max_retries=3)
-config.max_retries = 5  # 🚫 ValidationError: frozen instance
+config.max_retries = 5  # <2>
 ```
+
+1. Makes all fields immutable after creation
+2. 🚫 `ValidationError`: frozen instance
 
 ### TypeScript (Zod)
 
-```typescript
+```{.typescript code-line-numbers="5,8"}
 import { z } from "zod";
 
 const AppConfigSchema = z.object({
   apiKey: z.string(),
   maxRetries: z.number().int().min(1).max(10),
-}).readonly();
+}).readonly();  // <1>
 
-const config = AppConfigSchema.parse({ apiKey: "sk-123", maxRetries: 3 });
-config.maxRetries = 5;  // 🚫 Compile error: readonly property
+config.maxRetries = 5;  // <2>
 ```
+
+1. Makes all fields `Readonly` after parsing
+2. 🚫 Compile error: readonly property
 
 :::
 
