@@ -77,6 +77,12 @@ Examples assume a **Python-TypeScript** full-stack, but the outlined principles 
 
 :::
 
+::: {style="background-color: #f5f5f5; padding: 15px; border-radius: 25px; text-align: center; font-size: 0.85em;"}
+
+Python examples use `from pydantic import *` for brevity. In production code, prefer explicit imports.
+
+:::
+
 # Introduction
 
 *Why data validation matters*
@@ -265,8 +271,8 @@ TypeScript-first schema validation with type inference
 ### Python (Pydantic)
 
 ```python
+from pydantic import *
 from typing import Annotated, Literal
-from pydantic import BaseModel, EmailStr, Field
 
 UserName = Annotated[str, Field(min_length=3, max_length=20)]
 
@@ -347,8 +353,8 @@ def validate_user(data):
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
 ```python
+from pydantic import *
 from typing import Annotated, Literal
-from pydantic import BaseModel, Field
 
 UserName = Annotated[str, Field(min_length=3, max_length=20)]
 
@@ -470,8 +476,6 @@ class User(BaseModel):
 **⚠️ Better: `EmailStr`**
 
 ```python
-from pydantic import EmailStr
-
 class User(BaseModel):
     email: EmailStr
 ```
@@ -491,15 +495,18 @@ class User(BaseModel):
 **✅ Best: `AcmeEmailStr`**
 
 ```python
+from pydantic import *
 from typing import Annotated
-from pydantic import AfterValidator, EmailStr
 
 def must_be_acme(value: str) -> str:
     if not value.endswith('@acme.com'):
         raise ValueError('Must be @acme.com')
     return value
 
-AcmeEmailStr = Annotated[EmailStr, AfterValidator(must_be_acme)]
+AcmeEmailStr = Annotated[
+    EmailStr,
+    AfterValidator(must_be_acme),
+]
 
 class User(BaseModel):
     email: AcmeEmailStr
@@ -614,7 +621,7 @@ const UserSchema = z.object({
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field, PositiveFloat
+from pydantic import *
 
 class ProductPrice(BaseModel):
     product_id: str
@@ -711,7 +718,7 @@ Data validated as it enters the system, catching errors early.
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel
+from pydantic import *
 from datetime import datetime
 
 class Event(BaseModel):
@@ -809,7 +816,7 @@ Handles common API/JSON data format conversions automatically!
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, ValidationError, EmailStr, Field
+from pydantic import *
 
 class SignupForm(BaseModel):
     username: str = Field(min_length=3)
@@ -913,7 +920,7 @@ Specific, actionable feedback about what's wrong and where.
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel
+from pydantic import *
 
 class Address(BaseModel):
     street: str
@@ -1033,7 +1040,7 @@ Schema is both validator and type definition!
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field
+from pydantic import *
 
 class ApiResponse(BaseModel):
     status: str = Field(pattern=r'^(success|error)$')
@@ -1138,7 +1145,7 @@ External data is validated before entering your type-safe code!
 **Schema Evolution**
 
 ```python
-from pydantic import BaseModel
+from pydantic import *
 from typing import Literal
 
 # Version 1: Original schema
@@ -1287,7 +1294,7 @@ def test_signup_validation():
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
 ```python
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import *
 
 class User(BaseModel):
     email: EmailStr
@@ -1390,7 +1397,7 @@ Validation testing is delegated to the well-tested library!
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field, PositiveFloat
+from pydantic import *
 from hypothesis.strategies import builds
 from pydantic_factories import ModelFactory
 
@@ -1505,7 +1512,7 @@ Generate hundreds of valid test cases from your schema!
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, ConfigDict
+from pydantic import *
 
 class UserUpdate(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -1591,7 +1598,7 @@ Attackers can't inject fields to escalate privileges!
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field, PositiveFloat
+from pydantic import *
 
 class PaymentRequest(BaseModel):
     user_id: str
@@ -1702,8 +1709,8 @@ Use strict schemas at trust boundaries; coerce only when intentional.
 **Schema Definition**
 
 ```python
+from pydantic import *
 from typing import Annotated
-from pydantic import BaseModel, Field
 
 class CommentSubmission(BaseModel):
     post_id: str
@@ -1871,117 +1878,9 @@ class User(BaseModel):
 
 ::::
 
-## Validate Everywhere {.smaller}
-
-::: {.panel-tabset}
-
-### Client (UX)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```typescript
-import { z } from "zod";
-
-const UserName = z.string().min(3).max(20);
-
-const UserSchema = z.object({
-  username: UserName,
-  email: z.string().email(),
-  role: z.enum(["user", "guest"]),
-});
-
-async function submitUser(data: unknown) {
-  const result = UserSchema.safeParse(data);
-
-  if (!result.success) {
-    showErrors(result.error.format());
-    return; // Instant feedback
-  }
-
-  await createUser(result.data);
-}
-```
-
-:::
-
-::: {.column width="50%"}
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px;"}
-
-**Benefits:**
-
-- ✅ Instant feedback
-- ✅ Better UX
-- ✅ Reduced server load
-- ✅ Can still provide local feedback during poor connectivity
-
-**Not for security!**
-
-:::
-
-:::
-
-::::
-
-### Server (Security)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-```python
-from typing import Annotated, Literal
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
-
-UserName = Annotated[str, Field(min_length=3, max_length=20)]
-
-class UserCreate(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-
-    username: UserName
-    email: EmailStr
-    role: Literal["user", "guest"]
-
-@app.post("/api/users")
-def create_user(user: UserCreate):
-    db.save(user)
-    return user
-```
-
-:::
-
-::: {.column width="50%"}
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px;"}
-
-**Benefits:**
-
-- ✅ Never trust client
-- ✅ Blocks attacks
-- ✅ Data integrity
-- ✅ Mass assignment protection
-
-**Mandatory for security!**
-
-:::
-
-:::
-
-::::
-
-:::
-
 ::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 
 Client for UX, server for security. Both are essential. Matching schemas on both sides act as a **contract test** – catching API mismatches at runtime.
-
-:::
-
-::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 12px; text-align: center; font-size: 0.85em;"}
-
-Use permissive parsing only at ingestion boundaries, then convert to strict internal models and fail closed on unknown fields.
 
 :::
 
@@ -2002,8 +1901,8 @@ Use permissive parsing only at ingestion boundaries, then convert to strict inte
 **Schema Definition**
 
 ```python
+from pydantic import *
 from typing import Annotated
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 UserName = Annotated[str, Field(min_length=3, max_length=20)]
 
@@ -2137,7 +2036,7 @@ API docs generated from schemas, always accurate!
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field, model_validator, field_serializer
+from pydantic import *
 from datetime import datetime
 
 class BlogPost(BaseModel):
@@ -2259,7 +2158,7 @@ Parse, normalize, and serialize complex data automatically!
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import *
 
 class DatabaseConfig(BaseModel):
     model_config = ConfigDict(frozen=True)
