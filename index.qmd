@@ -73,13 +73,11 @@ Create a **validated type system** that works at runtime, ensuring data actually
 
 ::: {style="background-color: #e3f2fd; padding: 20px; border-radius: 25px; text-align: center;"}
 
-Examples assume a **Python-TypeScript** full-stack, but the outlined principles are relevant in other stacks as well.
+Examples assume a **Python-TypeScript** full-stack, but the principles apply to other stacks.
 
+::: {style="font-size: 0.7em; margin-top: 8px;"}
+Python examples use `from pydantic import *` for brevity; prefer explicit imports in production.
 :::
-
-::: {style="background-color: #f5f5f5; padding: 15px; border-radius: 25px; text-align: center; font-size: 0.85em;"}
-
-Python examples use `from pydantic import *` for brevity. In production code, prefer explicit imports.
 
 :::
 
@@ -329,16 +327,14 @@ Schema definition, validation logic, and type information live in **one place** 
 ```python
 # Imperative: Lots of manual checks
 def validate_user(data):
-    if not isinstance(data.get('username'), str):
-        raise ValueError('Username must be string')
-    if len(data['username']) < 3 or len(data['username']) > 20:
-        raise ValueError('Username must be 3-20 chars')
+    if not isinstance(data.get('email'), str):
+        raise ValueError('Email must be string')
+    if '@' not in data['email']:
+        raise ValueError('Invalid email')
     if not isinstance(data.get('age'), int):
         raise ValueError('Age must be integer')
     if data['age'] < 18 or data['age'] > 120:
         raise ValueError('Age must be 18-120')
-    if data.get('role') not in ['admin', 'user', 'guest']:
-        raise ValueError('Invalid role')
     # ... and so on
 ```
 
@@ -354,15 +350,10 @@ def validate_user(data):
 
 ```python
 from pydantic import *
-from typing import Annotated, Literal
 
-UserName = Annotated[str, Field(min_length=3, max_length=20)]
-
-# Declarative: What the data should look like
 class User(BaseModel):
-    username: UserName
+    email: EmailStr
     age: int = Field(ge=18, le=120)
-    role: Literal["admin", "user", "guest"]
 ```
 
 :::
@@ -384,20 +375,17 @@ class User(BaseModel):
 ```typescript
 // Imperative: Lots of manual checks
 function validateUser(data: any) {
-  if (typeof data.username !== 'string') {
-    throw new Error('Username must be string');
+  if (typeof data.email !== 'string') {
+    throw new Error('Email must be string');
   }
-  if (data.username.length < 3 || data.username.length > 20) {
-    throw new Error('Username must be 3-20 chars');
+  if (!data.email.includes('@')) {
+    throw new Error('Invalid email');
   }
   if (typeof data.age !== 'number') {
     throw new Error('Age must be number');
   }
   if (data.age < 18 || data.age > 120) {
     throw new Error('Age must be 18-120');
-  }
-  if (!['admin', 'user', 'guest'].includes(data.role)) {
-    throw new Error('Invalid role');
   }
   // ... and so on
 }
@@ -416,13 +404,9 @@ function validateUser(data: any) {
 ```typescript
 import { z } from "zod";
 
-const UserName = z.string().min(3).max(20);
-
-// Declarative: What the data should look like
 const UserSchema = z.object({
-  username: UserName,
+  email: z.string().email(),
   age: z.number().int().min(18).max(120),
-  role: z.enum(["admin", "user", "guest"]),
 });
 
 type User = z.infer<typeof UserSchema>;
