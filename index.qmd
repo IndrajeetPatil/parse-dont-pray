@@ -265,11 +265,13 @@ TypeScript-first schema validation with type inference
 ### Python (Pydantic)
 
 ```python
+from typing import Annotated, Literal
 from pydantic import BaseModel, EmailStr, Field
-from typing import Literal
+
+UserName = Annotated[str, Field(min_length=3, max_length=20)]
 
 class UserProfile(BaseModel):
-    username: str = Field(min_length=3, max_length=20)
+    username: UserName
     email: EmailStr
     age: int = Field(ge=18, le=120)
     role: Literal["admin", "user", "guest"]
@@ -281,8 +283,10 @@ class UserProfile(BaseModel):
 ```typescript
 import { z } from "zod";
 
+const UserName = z.string().min(3).max(20);
+
 const UserProfileSchema = z.object({
-  username: z.string().min(3).max(20),
+  username: UserName,
   email: z.string().email(),
   age: z.number().int().min(18).max(120),
   role: z.enum(["admin", "user", "guest"]),
@@ -343,12 +347,14 @@ def validate_user(data):
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
 ```python
+from typing import Annotated, Literal
 from pydantic import BaseModel, Field
-from typing import Literal
+
+UserName = Annotated[str, Field(min_length=3, max_length=20)]
 
 # Declarative: What the data should look like
 class User(BaseModel):
-    username: str = Field(min_length=3, max_length=20)
+    username: UserName
     age: int = Field(ge=18, le=120)
     role: Literal["admin", "user", "guest"]
 ```
@@ -404,9 +410,11 @@ function validateUser(data: any) {
 ```typescript
 import { z } from "zod";
 
+const UserName = z.string().min(3).max(20);
+
 // Declarative: What the data should look like
 const UserSchema = z.object({
-  username: z.string().min(3).max(20),
+  username: UserName,
   age: z.number().int().min(18).max(120),
   role: z.enum(["admin", "user", "guest"]),
 });
@@ -606,7 +614,7 @@ const UserSchema = z.object({
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, ValidationError, Field, PositiveFloat
+from pydantic import BaseModel, Field, PositiveFloat
 
 class ProductPrice(BaseModel):
     product_id: str
@@ -1130,7 +1138,7 @@ function processResponse(response: ApiResponse): void {
 **Schema Evolution**
 
 ```python
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Literal
 
 # Version 1: Original schema
@@ -1293,11 +1301,13 @@ def test_user_validation():
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
 ```python
+from typing import Annotated, Literal
 from pydantic import BaseModel, Field, EmailStr
-from typing import Literal
+
+UserName = Annotated[str, Field(min_length=3, max_length=20)]
 
 class User(BaseModel):
-    username: str = Field(min_length=3, max_length=20)
+    username: UserName
     email: EmailStr
     age: int = Field(ge=18, le=120)
     role: Literal["user", "admin", "guest"]
@@ -1374,8 +1384,10 @@ describe("User validation", () => {
 ```typescript
 import { z } from "zod";
 
+const UserName = z.string().min(3).max(20);
+
 const UserSchema = z.object({
-  username: z.string().min(3).max(20),
+  username: UserName,
   email: z.string().email(),
   age: z.number().min(18).max(120),
   role: z.enum(["user", "admin", "guest"]),
@@ -2041,8 +2053,10 @@ class User(BaseModel):
 ```typescript
 import { z } from "zod";
 
+const UserName = z.string().min(3).max(20);
+
 const UserSchema = z.object({
-  username: z.string().min(3).max(20),
+  username: UserName,
   email: z.string().email(),
   role: z.enum(["user", "guest"]),
 });
@@ -2087,13 +2101,15 @@ async function submitUser(data: unknown) {
 ::: {.column width="50%"}
 
 ```python
+from typing import Annotated, Literal
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
-from typing import Literal
+
+UserName = Annotated[str, Field(min_length=3, max_length=20)]
 
 class UserCreate(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
-    username: str = Field(min_length=3, max_length=20)
+    username: UserName
     email: EmailStr
     role: Literal["user", "guest"]
 
@@ -2155,7 +2171,10 @@ def create_user(user: UserCreate):
 **Schema Definition**
 
 ```python
+from typing import Annotated
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
+
+UserName = Annotated[str, Field(min_length=3, max_length=20)]
 
 class User(BaseModel):
     model_config = ConfigDict(
@@ -2171,7 +2190,7 @@ class User(BaseModel):
 
     user_id: str = Field(description="Unique user identifier")
     email: EmailStr = Field(description="User's email address")
-    username: str = Field(min_length=3, max_length=20)
+    username: UserName
     is_active: bool = Field(default=True)
 ```
 
@@ -2216,10 +2235,12 @@ def create_user(user: User) -> User:
 import { z } from "zod";
 import { generateSchema } from "@anatine/zod-openapi";
 
+const UserName = z.string().min(3).max(20);
+
 const UserSchema = z.object({
   userId: z.string().describe("Unique user identifier"),
   email: z.string().email().describe("User's email address"),
-  username: z.string().min(3).max(20),
+  username: UserName,
   isActive: z.boolean().default(true),
 }).openapi({
   example: {
@@ -2580,13 +2601,16 @@ def create_user_without_pydantic(data: dict):
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
 ```python
-from pydantic import BaseModel, EmailStr, Field, NonNegativeInt
+from typing import Annotated
+from pydantic import BaseModel, EmailStr, Field, PositiveInt
+
+UserName = Annotated[str, Field(min_length=3)]
 
 # Concise and clear
 class User(BaseModel):
-    username: str = Field(min_length=3)
+    username: UserName
     email: EmailStr
-    age: NonNegativeInt
+    age: PositiveInt
 
 # That's it! Full validation, type safety, IDE support
 user = User(**data)  # ← One line replaces 50+ lines
@@ -2652,11 +2676,13 @@ function createUserWithoutZod(data: any): User {
 ```typescript
 import { z } from "zod";
 
+const UserName = z.string().min(3);
+
 // Concise and clear
 const UserSchema = z.object({
-  username: z.string().min(3),
+  username: UserName,
   email: z.string().email(),
-  age: z.number().nonnegative(),
+  age: z.number().int().positive(),
 });
 
 type User = z.infer<typeof UserSchema>;
