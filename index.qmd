@@ -610,7 +610,7 @@ from pydantic import *
 class ProductPrice(BaseModel):
     product_id: str
     price: PositiveFloat
-    currency: str = Field(pattern=r'^[A-Z]{3}$')
+    currency: Currency  # from pydantic_extra_types
 ```
 
 :::
@@ -1526,7 +1526,7 @@ from pydantic import *
 class PaymentRequest(BaseModel):
     user_id: str
     amount: PositiveFloat
-    currency: str = Field(pattern=r'^[A-Z]{3}$')
+    currency: Currency  # from pydantic_extra_types
 ```
 
 :::
