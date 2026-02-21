@@ -2094,33 +2094,6 @@ Data validation libraries like Pydantic and Zod transform how we build applicati
 
 :::
 
-## Resources {.smaller}
-
-Learn more about these powerful libraries:
-
-::: {style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 15px; font-size: 0.75em;"}
-
-### Pydantic (Python)
-
-- **Documentation**: [docs.pydantic.dev](https://docs.pydantic.dev/latest/)
-- **GitHub**: [github.com/pydantic/pydantic](https://github.com/pydantic/pydantic)
-- **Key Features**: Type validation, data parsing, FastAPI integration, JSON Schema generation
-
-### Zod (TypeScript)
-
-- **Documentation**: [zod.dev](https://zod.dev/)
-- **GitHub**: [github.com/colinhacks/zod](https://github.com/colinhacks/zod)
-- **Key Features**: Type inference, composable schemas, async validation, error formatting
-
-### Related Tools
-
-- **FastAPI**: Python web framework with built-in Pydantic support
-- **tRPC**: TypeScript RPC framework with Zod integration
-- **Hypothesis**: Property-based testing with Pydantic
-- **@faker-js/faker**: Test data generation for TypeScript
-
-:::
-
 # Thank You
 
 And Happy Parsing! 😊
