@@ -61,8 +61,6 @@ Source code: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/Indr
 - How Pydantic (Python) and Zod (TypeScript) improve code quality
 - Benefits across readability, runtime behavior, typing, testing, and security
 
-<br>
-
 ::: {style="background-color: #FFFBC1; padding: 20px; border-radius: 25px; text-align: center;"}
 
 🎯 **Goal**
@@ -85,7 +83,7 @@ Examples assume a **Python-TypeScript** full-stack, but the outlined principles 
 
 ## Dynamic vs Static Typing {.smaller}
 
-Understanding type systems explains why data validation is crucial.
+Type systems differ in **when** they catch type errors.
 
 :::: {.columns}
 
@@ -300,106 +298,8 @@ type UserProfile = z.infer<typeof UserProfileSchema>;
 The schema **is** the documentation—no separate docs needed!
 :::
 
-## Single Source of Truth {.smaller}
-
-::: {.panel-tabset}
-
-### Python (Pydantic)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
-```python
-from pydantic import BaseModel, Field, field_validator
-from datetime import datetime
-from uuid import UUID
-
-class Order(BaseModel):
-    order_id: str
-    customer_id: UUID
-    total_amount: float = Field(gt=0)
-    created_at: datetime
-    items: list[str] = Field(min_length=1)
-
-    @field_validator('order_id')
-    @classmethod
-    def validate_order_id(cls, value):
-        if not value.startswith('ORD-'):
-            raise ValueError('Order ID must start with ORD-')
-        return value
-```
-
-:::
-
-::: {.column width="50%"}
-
-**Usage Example**
-
-```python
-# Create an order instance
-order = Order(
-    order_id="ORD-123",
-    customer_id="550e8400-e29b-41d4-a716-446655440000",
-    total_amount=99.99,
-    created_at=datetime.now(),
-    items=["item1", "item2"]
-)
-```
-
-:::
-
-::::
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Schema definition, validation logic, and type information in one place.
-:::
-
-### TypeScript (Zod)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
-```typescript
-import { z } from "zod";
-
-const OrderSchema = z.strictObject({
-  orderId: z.string().startsWith("ORD-"),
-  customerId: z.string().uuid(),
-  totalAmount: z.number().positive(),
-  createdAt: z.date(),
-  items: z.array(z.string()).min(1),
-});
-
-type Order = z.infer<typeof OrderSchema>;
-```
-
-:::
-
-::: {.column width="50%"}
-
-**Usage Example**
-
-```typescript
-// Create an order instance
-const order = OrderSchema.parse({
-  orderId: "ORD-123",
-  customerId: "550e8400-e29b-41d4-a716-446655440000",
-  totalAmount: 99.99,
-  createdAt: new Date(),
-  items: ["item1", "item2"],
-});
-```
-
-:::
-
-::::
-
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center;"}
+Schema definition, validation logic, and type information live in **one place**—a single source of truth.
 :::
 
 ## Declarative Syntax {.smaller}
@@ -706,11 +606,11 @@ const UserSchema = z.object({
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, ValidationError, Field
+from pydantic import BaseModel, ValidationError, Field, PositiveFloat
 
 class ProductPrice(BaseModel):
     product_id: str
-    price: float = Field(gt=0)
+    price: PositiveFloat
     currency: str = Field(pattern=r'^[A-Z]{3}$')
 ```
 
@@ -1540,14 +1440,14 @@ describe("User permissions", () => {
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveFloat
 from hypothesis.strategies import builds
 from pydantic_factories import ModelFactory
 
 class Product(BaseModel):
     product_id: str = Field(pattern=r'^PROD-\d+$')
     name: str = Field(min_length=1, max_length=100)
-    price: float = Field(gt=0, le=10000)
+    price: PositiveFloat = Field(le=10000)
     in_stock: bool
 
 class ProductFactory(ModelFactory):
@@ -1872,11 +1772,11 @@ const userUpdate = UserUpdateSchema.parse(safeData);
 **Schema Definition**
 
 ```python
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveFloat
 
 class PaymentRequest(BaseModel):
     user_id: str
-    amount: float = Field(gt=0)
+    amount: PositiveFloat
     currency: str = Field(pattern=r'^[A-Z]{3}$')
 ```
 
@@ -2720,13 +2620,13 @@ def create_user_without_pydantic(data: dict):
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
 
 ```python
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, NonNegativeInt
 
 # Concise and clear
 class User(BaseModel):
     username: str = Field(min_length=3)
     email: EmailStr
-    age: int = Field(ge=0)
+    age: NonNegativeInt
 
 # That's it! Full validation, type safety, IDE support
 user = User(**data)  # ← One line replaces 50+ lines
