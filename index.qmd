@@ -1824,6 +1824,7 @@ One schema drives validation, types, **and** documentation.
 
 ```{mermaid}
 %%| eval: true
+%%| echo: false
 %%| fig-width: 9
 flowchart LR
     S["🔷 <b>Schema</b><br/><i>Pydantic / Zod</i>"]
