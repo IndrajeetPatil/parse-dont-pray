@@ -1613,7 +1613,9 @@ curl -X POST /api/users \
   -d '{"role": "admin"}'
 ```
 
-Privilege escalation – client validation is for **UX**, not security.
+Frontend never ran – attacker sends `"admin"` directly. Without server validation, this is **privilege escalation**.
+
+Client validation is for **UX** (fast feedback), not security.
 
 :::
 
@@ -1634,9 +1636,13 @@ async function submit(data: any) {
 }
 ```
 
-Each field error requires a round trip to the server – users fix one error, resubmit, discover the next.
+No client-side checks means every mistake requires a server round trip:
 
-Server validation is **mandatory** for security, but without client validation, **UX suffers**.
+1. Submit → "Email invalid" → fix → resubmit
+2. "Age too low" → fix → resubmit
+3. Finally succeeds after **3 round trips**
+
+Server validation is **mandatory** for security, but without client validation, users get a frustrating trial-and-error experience.
 
 :::
 
