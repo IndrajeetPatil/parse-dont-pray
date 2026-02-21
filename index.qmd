@@ -705,16 +705,11 @@ from pydantic import *
 from datetime import datetime
 
 class Event(BaseModel):
-    event_id: int        # <1>
-    timestamp: datetime  # <2>
-    is_public: bool      # <3>
-    attendees: list[str] # <4>
+    event_id: int        # Coerces string to int
+    timestamp: datetime  # Parses ISO 8601 strings
+    is_public: bool      # Coerces to bool
+    attendees: list[str] # Coerces tuple to list
 ```
-
-1. Coerces string to `int`
-2. Parses ISO 8601 strings to `datetime`
-3. Coerces `"yes"` / `"no"` to `bool`
-4. Coerces tuple to `list`
 
 :::
 
@@ -724,17 +719,12 @@ class Event(BaseModel):
 
 ```python
 event = Event(
-    event_id="42",                    # <1>
-    timestamp="2024-01-15T10:30:00",  # <2>
-    is_public="yes",                  # <3>
-    attendees=("Alice", "Bob")        # <4>
+    event_id="42",                    # → int 42
+    timestamp="2024-01-15T10:30:00",  # → datetime
+    is_public="yes",                  # → True
+    attendees=("Alice", "Bob")        # → list
 )
 ```
-
-1. → `int` 42
-2. → `datetime` object
-3. → `True`
-4. → `list`
 
 :::
 
@@ -752,15 +742,12 @@ event = Event(
 import { z } from "zod";
 
 const EventSchema = z.object({
-  eventId: z.coerce.number(),   // <1>
-  timestamp: z.coerce.date(),   // <2>
+  eventId: z.coerce.number(),   // Coerce to number
+  timestamp: z.coerce.date(),   // Parse to Date
   isPublic: z.boolean(),
   attendees: z.array(z.string()),
 });
 ```
-
-1. `z.coerce` converts string input to `number`
-2. `z.coerce` parses string input to `Date`
 
 :::
 
@@ -770,15 +757,12 @@ const EventSchema = z.object({
 
 ```typescript
 const event = EventSchema.parse({
-  eventId: "42",                     // <1>
-  timestamp: "2024-01-15T10:30:00",  // <2>
+  eventId: "42",                     // → number 42
+  timestamp: "2024-01-15T10:30:00",  // → Date
   isPublic: true,
   attendees: ["Alice", "Bob"],
 });
 ```
-
-1. → `number` 42
-2. → `Date` object
 
 :::
 
@@ -1441,11 +1425,9 @@ Generate hundreds of valid test cases from your schema!
 from pydantic import *
 
 class UserUpdate(BaseModel):
-    model_config = ConfigDict(extra='forbid')  # <1>
+    model_config = ConfigDict(extra='forbid')  # Rejects unknown fields
     email: str
 ```
-
-1. Rejects any fields not defined in the schema
 
 :::
 
@@ -1480,12 +1462,10 @@ UserUpdate(
 ```{.typescript code-line-numbers="3"}
 import { z } from "zod";
 
-const UserUpdateSchema = z.strictObject({  // <1>
+const UserUpdateSchema = z.strictObject({  // Rejects unknown fields
   email: z.string().email(),
 });
 ```
-
-1. Rejects any fields not defined in the schema
 
 :::
 
@@ -1736,37 +1716,23 @@ Limit input sizes to prevent memory/storage exhaustion attacks!
 
 ::: {.column width="50%"}
 
-::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; font-size: 0.85em;"}
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; font-size: 0.75em;"}
 
 **❌ Client-Only Validation**
 
 ```typescript
-// Frontend validates
 const UserSchema = z.object({
   role: z.enum(["user", "guest"]),
 });
 ```
 
-```python
-# Backend trusts blindly
-@app.post("/api/users")
-def create_user(data: dict):
-    user = User(**data)  # No validation!
-    db.save(user)
-```
-
-**Attack:**
 ```bash
-# Bypass frontend entirely
-curl -X POST /api/users -d '{
-  "role": "admin",
-  "balance": 999999
-}'
+# Attacker bypasses frontend entirely
+curl -X POST /api/users \
+  -d '{"role": "admin"}'
 ```
 
-**Result**: Privilege escalation and mass assignment risk.
-
-**Lesson**: Client validation is for **UX**, not security. Matching schemas on both sides act as a **contract test** – catching API mismatches at runtime.
+Privilege escalation – client validation is for **UX**, not security.
 
 :::
 
@@ -1774,12 +1740,11 @@ curl -X POST /api/users -d '{
 
 ::: {.column width="50%"}
 
-::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; font-size: 0.85em;"}
+::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; font-size: 0.75em;"}
 
 **⚠️ Server-Only Validation**
 
 ```typescript
-// Frontend sends unvalidated data
 async function submit(data: any) {
   await fetch("/api/users", {
     method: "POST",
@@ -1788,23 +1753,9 @@ async function submit(data: any) {
 }
 ```
 
-```python
-# Backend validates
-class User(BaseModel):
-    email: EmailStr
-    age: int = Field(ge=18)
-```
+Each field error requires a round trip to the server – users fix one error, resubmit, discover the next.
 
-**User Experience:**
-
-1. Submit form → wait 200ms
-2. "Email invalid" → fix → wait 200ms
-3. "Age too low" → fix → wait 200ms
-4. Finally succeeds after 3 round trips
-
-**Result**: Frustration, poor UX, abandoned forms.
-
-**Lesson**: Server validation is **mandatory** for security, but without client validation, UX suffers.
+Server validation is **mandatory** for security, but without client validation, **UX suffers**.
 
 :::
 
@@ -1854,16 +1805,13 @@ API docs generated from schemas, always accurate!
 from pydantic import *
 
 class AppConfig(BaseModel):
-    model_config = ConfigDict(frozen=True)  # <1>
+    model_config = ConfigDict(frozen=True)  # Immutable after creation
 
     api_key: str
     max_retries: int = Field(ge=1, le=10)
 
-config.max_retries = 5  # <2>
+config.max_retries = 5  # 🚫 ValidationError: frozen instance
 ```
-
-1. Makes all fields immutable after creation
-2. 🚫 `ValidationError`: frozen instance
 
 ### TypeScript (Zod)
 
@@ -1873,13 +1821,10 @@ import { z } from "zod";
 const AppConfigSchema = z.object({
   apiKey: z.string(),
   maxRetries: z.number().int().min(1).max(10),
-}).readonly();  // <1>
+}).readonly();  // Immutable after parsing
 
-config.maxRetries = 5;  // <2>
+config.maxRetries = 5;  // 🚫 Compile error: readonly property
 ```
-
-1. Makes all fields `Readonly` after parsing
-2. 🚫 Compile error: readonly property
 
 :::
 
