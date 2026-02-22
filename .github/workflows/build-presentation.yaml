@@ -33,7 +33,7 @@ jobs:
           pandoc-version: latest
 
       - name: Setup Chrome (for Mermaid PNG rendering)
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
 
       - name: Install Quarto extensions
         run: |
