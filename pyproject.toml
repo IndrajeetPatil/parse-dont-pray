@@ -3,7 +3,7 @@ name = "parse-dont-pray"
 version = "1.0.0"
 description = "A presentation exploring the benefits of data validation libraries like Pydantic and Zod"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 license = { text = "CC0 1.0 Universal" }
 authors = [
     { name = "Indrajeet Patil", email = "patilindrajeet.science@gmail.com" }
