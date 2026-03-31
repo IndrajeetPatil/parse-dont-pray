@@ -17,10 +17,10 @@ keywords = [
     "software-engineering",
     "type-safety"
 ]
-dependencies = ["jupyter>=1.0.0", "ipykernel>=6.29.0", "matplotlib>=3.8.0"]
+dependencies = ["jupyter>=1.1.1", "ipykernel>=7.2.0", "matplotlib>=3.10.8"]
 
 [tool.uv]
-required-version = ">=0.10.2"
+required-version = ">=0.11.2"
 
 [dependency-groups]
 dev = []
