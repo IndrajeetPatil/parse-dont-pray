@@ -3,9 +3,9 @@
 This presentation explores the benefits of using data validation libraries like Pydantic (Python) and Zod (TypeScript) to create robust, maintainable applications.
 
 The slides can be seen here:<br>
-<https://indrajeetpatil.github.io/parse-dont-pray/>
+<https://www.indrapatil.com/parse-dont-pray/>
 
-<a href="https://indrajeetpatil.github.io/parse-dont-pray/" target="_blank">
+<a href="https://www.indrapatil.com/parse-dont-pray/" target="_blank">
 <img src="media/social-media-card.jpg" alt="introductory slide" width="400"/>
 </a>
 
