@@ -5,7 +5,7 @@ This presentation explores the benefits of using data validation libraries like 
 The slides can be seen here:<br>
 <https://www.indrapatil.com/parse-dont-pray/>
 
-<a href="https://www.indrapatil.com/parse-dont-pray/" target="_blank">
+<a href="https://www.indrapatil.com/parse-dont-pray/" target="_blank" rel="noopener noreferrer">
 <img src="media/social-media-card.jpg" alt="introductory slide" width="400"/>
 </a>
 
