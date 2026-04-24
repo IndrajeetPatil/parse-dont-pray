@@ -1,0 +1,10 @@
+# Parse, Don't Pray: The Case for Data Validation
+
+This is the well-known discovery copy for agentic assistants.
+
+Canonical slides: https://www.indrapatil.com/parse-dont-pray/
+Root llms.txt: https://www.indrapatil.com/parse-dont-pray/llms.txt
+Root llms-full.txt: https://www.indrapatil.com/parse-dont-pray/llms-full.txt
+Source: https://github.com/IndrajeetPatil/parse-dont-pray/
+
+Summary: Explore the benefits of data validation libraries like Pydantic and Zod. Learn how they improve readability, type safety, testing, security, and maintainability in your applications.

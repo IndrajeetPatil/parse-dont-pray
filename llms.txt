@@ -1,0 +1,29 @@
+# Parse, Don't Pray: The Case for Data Validation
+
+> A Quarto RevealJS presentation by Indrajeet Patil.
+
+Explore the benefits of data validation libraries like Pydantic and Zod. Learn how they improve readability, type safety, testing, security, and maintainability in your applications.
+
+## Primary URL
+
+- [Slides](https://www.indrapatil.com/parse-dont-pray/)
+
+## Source
+
+- [GitHub repository](https://github.com/IndrajeetPatil/parse-dont-pray/)
+
+## Topics
+
+- data validation
+- pydantic
+- zod
+- python
+- typescript
+- software engineering
+- type safety
+- presentation
+- slides
+
+## Machine-readable companion
+
+- [Full agent summary](https://www.indrapatil.com/parse-dont-pray/llms-full.txt)
