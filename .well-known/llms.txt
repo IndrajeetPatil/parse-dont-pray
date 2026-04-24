@@ -1,0 +1,7 @@
+# Parse, Don't Pray: The Case for Data Validation
+
+> A Quarto RevealJS presentation by Indrajeet Patil.
+
+Canonical slides: https://www.indrapatil.com/parse-dont-pray/
+Full agent summary: https://www.indrapatil.com/parse-dont-pray/llms-full.txt
+Source: https://github.com/IndrajeetPatil/parse-dont-pray/
