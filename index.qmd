@@ -26,7 +26,7 @@ author-meta: "Indrajeet Patil"
 date-meta: "2025-12-06"
 lang: "en"
 dir: "ltr"
-image: "media/social-media-card.jpg"
+image: "media/social-media-card.webp"
 image-alt: "Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"
 canonical-url: "https://www.indrapatil.com/parse-dont-pray/"
 ---
@@ -44,7 +44,7 @@ Indrajeet Patil
 :::
 
 ::: {style="display: flex; justify-content: center; margin-top: 0.2em;"}
-![](media/social-media-card.jpg){width="85%" style="max-height: 400px; object-fit: contain;" fig-alt="Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"}
+![](media/social-media-card.webp){width="85%" style="max-height: 400px; object-fit: contain;" fig-alt="Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"}
 :::
 
 :::
