@@ -6,7 +6,7 @@ The slides can be seen here:<br>
 <https://www.indrapatil.com/parse-dont-pray/>
 
 <a href="https://www.indrapatil.com/parse-dont-pray/" target="_blank" rel="noopener noreferrer">
-<img src="media/social-media-card.jpg" alt="introductory slide" width="400"/>
+<img src="media/social-media-card.webp" alt="introductory slide" width="400"/>
 </a>
 
 ## Development
