@@ -1426,7 +1426,7 @@ Pydantic and Zod 4 emit JSON Schema, reducing drift; descriptions and examples s
 
 ### Python (Pydantic)
 
-```{.python code-line-numbers="4,9,11"}
+```{.python code-line-numbers="4,9,10"}
 from pydantic import *
 
 class AppConfig(BaseModel):
@@ -1441,7 +1441,7 @@ config.max_retries = 5  # 🚫 ValidationError: frozen instance
 
 ### TypeScript (Zod)
 
-```{.typescript code-line-numbers="5,9,10"}
+```{.typescript code-line-numbers="5,8,9"}
 import { z } from "zod";
 
 const AppConfigSchema = z.object({
