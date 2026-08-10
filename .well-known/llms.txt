@@ -5,3 +5,5 @@
 Canonical slides: https://www.indrapatil.com/parse-dont-pray/
 Full agent summary: https://www.indrapatil.com/parse-dont-pray/llms-full.txt
 Source: https://github.com/IndrajeetPatil/parse-dont-pray/
+
+Topics include current Pydantic 2 and Zod 4 validation APIs, type safety, contract testing, and safer input boundaries.
