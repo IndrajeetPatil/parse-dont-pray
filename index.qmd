@@ -66,8 +66,6 @@ Create a **validated type system** that works at runtime, ensuring data actually
 
 :::
 
-<br>
-
 ::: {style="background-color: #e3f2fd; padding: 20px; border-radius: 25px; text-align: center;"}
 
 Examples assume a **Python-TypeScript** full-stack, but the principles apply to other stacks.
@@ -188,10 +186,10 @@ Manual checks scattered throughout code:
 **✅ With validation libraries**
 :::
 
-Schemas automatically validate, parse, and type data:
+Schemas validate and parse inputs into typed outputs:
 
 - Centralized, self-documenting rules
-- Automatic type coercion
+- Explicit coercion where appropriate
 - Detailed error messages
 - Easier to maintain and evolve
 
@@ -288,8 +286,8 @@ const UserName = z.string().min(3).max(20);
 
 const UserProfileSchema = z.object({
   username: UserName,
-  email: z.string().email(),
-  age: z.number().int().min(18).max(120),
+  email: z.email(),
+  age: z.int().min(18).max(120),
   role: z.enum(["admin", "user", "guest"]),
   isActive: z.boolean().default(true),
 });
@@ -300,125 +298,11 @@ type UserProfile = z.infer<typeof UserProfileSchema>;
 :::
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-The schema **is** the documentation – no separate docs needed!
+The schema documents the executable contract; human-facing context still belongs in docs.
 :::
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center;"}
-Schema definition, validation logic, and type information live in **one place** – a single source of truth.
-:::
-
-## Declarative Syntax {.smaller}
-
-::: {.panel-tabset}
-
-### Python
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Without Pydantic**
-
-::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
-
-```python
-# Imperative: Lots of manual checks
-def validate_user(data):
-    if not isinstance(data.get('email'), str):
-        raise ValueError('Email must be string')
-    if '@' not in data['email']:
-        raise ValueError('Invalid email')
-    if not isinstance(data.get('age'), int):
-        raise ValueError('Age must be integer')
-    if data['age'] < 18 or data['age'] > 120:
-        raise ValueError('Age must be 18-120')
-    # ... and so on
-```
-
-:::
-
-:::
-
-::: {.column width="50%"}
-
-**With Pydantic**
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
-
-```python
-from pydantic import *
-
-class User(BaseModel):
-    email: EmailStr
-    age: int = Field(ge=18, le=120)
-```
-
-:::
-
-:::
-
-::::
-
-### TypeScript
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Without Zod**
-
-::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
-
-```typescript
-// Imperative: Lots of manual checks
-function validateUser(data: any) {
-  if (typeof data.email !== 'string') {
-    throw new Error('Email must be string');
-  }
-  if (!data.email.includes('@')) {
-    throw new Error('Invalid email');
-  }
-  if (typeof data.age !== 'number') {
-    throw new Error('Age must be number');
-  }
-  if (data.age < 18 || data.age > 120) {
-    throw new Error('Age must be 18-120');
-  }
-  // ... and so on
-}
-```
-
-:::
-
-:::
-
-::: {.column width="50%"}
-
-**With Zod**
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
-
-```typescript
-import { z } from "zod";
-
-const UserSchema = z.object({
-  email: z.string().email(),
-  age: z.number().int().min(18).max(120),
-});
-
-type User = z.infer<typeof UserSchema>;
-```
-
-:::
-
-:::
-
-::::
-
-:::
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Describes *what* the data should look like, not *how* to validate it.
+Schema definition, validation logic, and type information stay synchronized in **one place**.
 :::
 
 ## Specific Types Over Generic {.smaller}
@@ -531,11 +415,11 @@ const UserSchema = z.object({
 
 ::: {style="background-color: #fff3e0; padding: 12px; border-radius: 8px; font-size: 0.9em;"}
 
-**⚠️ Better: `.email()`**
+**⚠️ Better: `z.email()`**
 
 ```typescript
 const UserSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
 });
 ```
 
@@ -554,9 +438,7 @@ const UserSchema = z.object({
 **✅ Best: Custom refinement**
 
 ```typescript
-const acmeEmail = z
-  .string()
-  .email()
+const acmeEmail = z.email()
   .refine(
     (email) => email.endsWith('@acme.com'),
     { message: 'Must be @acme.com email' }
@@ -603,11 +485,12 @@ const UserSchema = z.object({
 
 ```python
 from pydantic import *
+from pydantic_extra_types.currency_code import Currency
 
 class ProductPrice(BaseModel):
     product_id: str
     price: PositiveFloat
-    currency: Currency  # from pydantic_extra_types
+    currency: Currency
 ```
 
 :::
@@ -740,9 +623,9 @@ event = Event(
 import { z } from "zod";
 
 const EventSchema = z.object({
-  eventId: z.coerce.number(),   // Coerce to number
-  timestamp: z.coerce.date(),   // Parse to Date
-  isPublic: z.boolean(),
+  eventId: z.coerce.number(),
+  timestamp: z.coerce.date(),
+  isPublic: z.stringbool(),
   attendees: z.array(z.string()),
 });
 ```
@@ -757,7 +640,7 @@ const EventSchema = z.object({
 const event = EventSchema.parse({
   eventId: "42",                     // → number 42
   timestamp: "2024-01-15T10:30:00",  // → Date
-  isPublic: true,
+  isPublic: "yes",                   // → boolean true
   attendees: ["Alice", "Bob"],
 });
 ```
@@ -769,7 +652,7 @@ const event = EventSchema.parse({
 :::
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Handles common API/JSON data format conversions automatically!
+Supports common conversions; make coercion explicit at untrusted boundaries.
 :::
 
 ## Detailed Error Messages {.smaller}
@@ -834,7 +717,7 @@ import { z } from "zod";
 
 const SignupFormSchema = z.object({
   username: z.string().min(3),
-  email: z.string().email(),
+  email: z.email(),
 });
 ```
 
@@ -851,13 +734,14 @@ const result = SignupFormSchema.safeParse({
 });
 
 if (!result.success) {
-  console.log(result.error.format());
+  console.log(z.treeifyError(result.error));
   // Output:
   // {
-  //   "username": {
-  //     "_errors": ["at least 3 character(s)"]
-  //   },
-  //   "email": { "_errors": ["Invalid email"] }
+  //   "errors": [],
+  //   "properties": {
+  //     "username": { "errors": ["Too small: ..."] },
+  //     "email": { "errors": ["Invalid email address"] }
+  //   }
   // }
 }
 ```
@@ -1058,7 +942,7 @@ import { z } from "zod";
 
 const ApiResponseSchema = z.object({
   status: z.enum(["success", "error"]),
-  data: z.array(z.record(z.unknown())),
+  data: z.array(z.record(z.string(), z.unknown())),
   message: z.string(),
 });
 
@@ -1104,43 +988,13 @@ External data is validated before entering your type-safe code!
 
 # Testing
 
-*Reduce test burden with built-in validation*
+*Verify your contract and integrations*
 
-## Reduced Test Burden {.smaller}
+## Test the Contract You Own {.smaller}
 
 ::: {.panel-tabset}
 
-### Python
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Without Pydantic**
-
-::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
-
-```python
-# Need tests for every validation rule
-def test_signup_validation():
-    with pytest.raises(ValueError):
-        create_user(email="invalid")
-    with pytest.raises(ValueError):
-        create_user(age=17)
-    with pytest.raises(ValueError):
-        create_user(age=121)
-    # ... more validation tests
-```
-
-:::
-
-:::
-
-::: {.column width="50%"}
-
-**With Pydantic**
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+### Python (Pydantic)
 
 ```python
 from pydantic import *
@@ -1149,145 +1003,42 @@ class User(BaseModel):
     email: EmailStr
     age: int = Field(ge=18, le=120)
 
-# Only test business logic, not validation
-def test_user_permissions():
-    admin = User(email="a@test.com", age=30)
-    assert admin.has_permission("delete_users")
-
-# Validation is covered by Pydantic itself.
+def test_user_schema_contract():
+    assert User(email="a@test.com", age=18).age == 18
+    with pytest.raises(ValidationError):
+        User(email="a@test.com", age=17)
 ```
 
-:::
-
-:::
-
-::::
-
-### TypeScript
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Without Zod**
-
-::: {style="background-color: #ffebee; padding: 15px; border-radius: 8px;"}
-
-```typescript
-// Need tests for every validation rule
-describe("User validation", () => {
-  it("rejects invalid email", () => {
-    expect(() => createUser({ email: "invalid" }))
-      .toThrow();
-  });
-  it("rejects young age", () => {
-    expect(() => createUser({ age: 17 }))
-      .toThrow();
-  });
-  // ... more validation tests
-});
-```
-
-:::
-
-:::
-
-::: {.column width="50%"}
-
-**With Zod**
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 8px;"}
+### TypeScript (Zod)
 
 ```typescript
 import { z } from "zod";
 
 const UserSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   age: z.number().min(18).max(120),
 });
 
-type User = z.infer<typeof UserSchema>;
-
-// Only test business logic, not validation
-describe("User permissions", () => {
-  it("admin has delete permission", () => {
-    const admin = UserSchema.parse({
-      email: "a@test.com", age: 30,
-    });
-    expect(admin.hasPermission("delete_users")).toBe(true);
+describe("User schema contract", () => {
+  it("enforces the minimum age", () => {
+    expect(UserSchema.safeParse({
+      email: "a@test.com", age: 17,
+    }).success).toBe(false);
   });
 });
-
-// Validation is covered by Zod itself.
 ```
-
-:::
-
-:::
-
-::::
 
 :::
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Validation testing is delegated to the well-tested library!
-:::
-
-## Easy Mock Data Generation {.smaller}
-
-::: {.panel-tabset}
-
-### Python (Pydantic + Hypothesis)
-
-```python
-from pydantic import *
-from hypothesis import given
-from hypothesis.strategies import builds
-
-class Product(BaseModel):
-    name: str = Field(min_length=1, max_length=100)
-    price: PositiveFloat = Field(le=10000)
-
-# Hypothesis auto-generates valid instances from the schema
-@given(builds(Product))
-def test_product_discount(product):
-    discounted = apply_discount(product, 0.1)
-    assert discounted.price < product.price
-```
-
-### TypeScript (Zod + Faker)
-
-```typescript
-import { z } from "zod";
-import { faker } from "@faker-js/faker";
-
-const ProductSchema = z.object({
-  name: z.string().min(1).max(100),
-  price: z.number().positive().max(10000),
-});
-
-type Product = z.infer<typeof ProductSchema>;
-
-// Faker generates valid test data matching the schema
-function generateProduct(): Product {
-  return ProductSchema.parse({
-    name: faker.commerce.productName(),
-    price: faker.number.float({ min: 0.01, max: 10000 }),
-  });
-}
-```
-
-:::
-
-::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Generate hundreds of valid test cases from your schema!
+Trust library mechanics; test boundary values, custom rules, and failure handling.
 :::
 
 # Security
 
-*Prevent vulnerabilities through validation*
+*Constrain untrusted input before business logic*
 
-## Input Sanitization {.smaller}
+## Reject Unexpected Fields {.smaller}
 
 ::: {.panel-tabset}
 
@@ -1342,7 +1093,7 @@ UserUpdate(
 import { z } from "zod";
 
 const UserUpdateSchema = z.strictObject({  // Rejects unknown fields
-  email: z.string().email(),
+  email: z.email(),
 });
 ```
 
@@ -1371,7 +1122,7 @@ UserUpdateSchema.parse({
 :::
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Attackers can't inject fields to escalate privileges!
+Rejecting unknown fields blocks one mass-assignment path; authorization is still required.
 :::
 
 ## Type Confusion Prevention {.smaller}
@@ -1388,11 +1139,14 @@ Attackers can't inject fields to escalate privileges!
 
 ```python
 from pydantic import *
+from pydantic_extra_types.currency_code import Currency
 
 class PaymentRequest(BaseModel):
+    model_config = ConfigDict(strict=True)
+
     user_id: str
     amount: PositiveFloat
-    currency: Currency  # from pydantic_extra_types
+    currency: Currency
 ```
 
 :::
@@ -1402,13 +1156,6 @@ class PaymentRequest(BaseModel):
 **Type Confusion Prevention**
 
 ```python
-# ✅ Valid payment
-PaymentRequest(
-    user_id="USR-123",
-    amount=10.0,
-    currency="USD"
-)
-
 # 🚫 String instead of float blocked
 PaymentRequest(
     user_id="USR-123",
@@ -1453,13 +1200,6 @@ const PaymentRequestSchema = z.object({
 **Type Confusion Prevention**
 
 ```typescript
-// ✅ Valid payment
-PaymentRequestSchema.parse({
-  userId: "USR-123",
-  amount: 10.0,
-  currency: "USD",
-});
-
 // 🚫 String instead of number blocked
 PaymentRequestSchema.parse({
   userId: "USR-123",
@@ -1481,7 +1221,7 @@ PaymentRequestSchema.parse({
 
 :::
 
-::: {style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
+::: {style="background-color: #fff3e0; padding: 10px; border-radius: 10px; margin-top: 8px; text-align: center; font-size: 0.85em;"}
 Use strict schemas at trust boundaries; coerce only when intentional.
 :::
 
@@ -1513,7 +1253,7 @@ class CommentSubmission(BaseModel):
 
 ::: {.column width="50%"}
 
-**DoS Attack Prevention**
+**Oversized Input Rejection**
 
 ```python
 # 🚫 Massive content blocked
@@ -1550,7 +1290,7 @@ const CommentSubmissionSchema = z.object({
   author: z.string().min(1).max(50),
   content: z.string().min(1).max(5000),
   tags: z.array(z.string().max(30)).max(10),
-  rating: z.number().int().min(1).max(5),
+  rating: z.int().min(1).max(5),
 });
 ```
 
@@ -1558,7 +1298,7 @@ const CommentSubmissionSchema = z.object({
 
 ::: {.column width="50%"}
 
-**DoS Attack Prevention**
+**Oversized Input Rejection**
 
 ```typescript
 // 🚫 Massive content blocked
@@ -1582,7 +1322,7 @@ CommentSubmissionSchema.parse({
 :::
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Limit input sizes to prevent memory/storage exhaustion attacks!
+Schema limits bound downstream work; enforce request-size limits at the server or proxy too.
 :::
 
 # Full-Stack Validation
@@ -1677,7 +1417,7 @@ flowchart LR
 ```
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-API docs generated from schemas, always accurate!
+Pydantic and Zod 4 emit JSON Schema, reducing drift; descriptions and examples still need review.
 :::
 
 ## Immutable Configs: Validate Once, Done {.smaller}
@@ -1686,7 +1426,7 @@ API docs generated from schemas, always accurate!
 
 ### Python (Pydantic)
 
-```{.python code-line-numbers="4,9"}
+```{.python code-line-numbers="4,9,10"}
 from pydantic import *
 
 class AppConfig(BaseModel):
@@ -1695,26 +1435,28 @@ class AppConfig(BaseModel):
     api_key: str
     max_retries: int = Field(ge=1, le=10)
 
+config = AppConfig(api_key="secret", max_retries=3)
 config.max_retries = 5  # 🚫 ValidationError: frozen instance
 ```
 
 ### TypeScript (Zod)
 
-```{.typescript code-line-numbers="5,8"}
+```{.typescript code-line-numbers="5,8,9"}
 import { z } from "zod";
 
 const AppConfigSchema = z.object({
   apiKey: z.string(),
-  maxRetries: z.number().int().min(1).max(10),
-}).readonly();  // Immutable after parsing
+  maxRetries: z.int().min(1).max(10),
+}).readonly();
 
-config.maxRetries = 5;  // 🚫 Compile error: readonly property
+const config = AppConfigSchema.parse({ apiKey: "secret", maxRetries: 3 });
+config.maxRetries = 5;  // 🚫 Compile error; runtime TypeError if attempted
 ```
 
 :::
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Validate once at startup, use confidently everywhere without re-checking.
+These freeze the top-level config; choose immutable nested types when deep immutability matters.
 :::
 
 # Summary
@@ -1729,15 +1471,15 @@ Data validation libraries like Pydantic and Zod transform how we build applicati
 
 ::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin: 15px 0;"}
 
-**Readability**: Self-documenting schemas that serve as single source of truth
+**Readability**: Executable contracts that keep rules and types synchronized
 
 **Runtime Safety**: Catch errors at system boundaries before they propagate
 
 **Type Safety**: Bridge the gap between static types and runtime data
 
-**Testing**: Reduce test burden and generate mock data easily
+**Testing**: Focus tests on domain rules, boundaries, and failure handling
 
-**Security**: Prevent injection, mass assignment, and DoS attacks
+**Security**: Reject unexpected or oversized input before business logic
 
 :::
 

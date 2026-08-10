@@ -38,9 +38,8 @@ render:
 preview:
     uv run --no-project quarto preview index.qmd
 
-# Open rendered slides in browser (macOS)
-open:
-    open index.html
+# Alias for preview
+alias open := preview
 
 # Clean generated files
 clean:
