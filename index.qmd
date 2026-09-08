@@ -1325,6 +1325,10 @@ CommentSubmissionSchema.parse({
 Schema limits bound downstream work. Zod 4.5 counts Unicode code points—not bytes or user-perceived graphemes—so enforce request-size limits at the server or proxy too.
 :::
 
+::: {style="text-align: center; font-size: 0.55em; margin-top: 8px;"}
+Source: [Zod 4.5 release notes](https://zod.dev/blog/zod-4-5#string-length-counts-code-points)
+:::
+
 # Full-Stack Validation
 
 *Client + Server validation for UX and security*
