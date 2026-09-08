@@ -10,7 +10,7 @@ Language: en
 
 ## Summary
 
-Explore the benefits of Pydantic and Zod for runtime validation, type safety, focused contract testing, and safer input boundaries. The deck uses current Pydantic 2 and Zod 4 APIs and distinguishes validation from authorization and transport-level protections.
+Explore the benefits of Pydantic and Zod for runtime validation, type safety, focused contract testing, and safer input boundaries. The deck uses current Pydantic 2.13 and Zod 4.5 APIs, covers measured validation optimization, and distinguishes validation from authorization and transport-level protections.
 
 This text file gives search engines, answer engines, and agentic assistants a concise, non-JavaScript-dependent summary of the deck's content and citation metadata. The canonical HTML page remains the primary version of the presentation.
 

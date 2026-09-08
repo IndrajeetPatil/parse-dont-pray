@@ -756,6 +756,64 @@ if (!result.success) {
 Specific, actionable feedback about what's wrong and where.
 :::
 
+## Optimize Repeated Validation {.smaller}
+
+Profile first; reuse schemas before weakening validation rules.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; font-size: 0.8em;"}
+
+**Python (Pydantic)**
+
+```python
+from pydantic import TypeAdapter
+
+# Build once, reuse across calls
+EventBatch = TypeAdapter(list[Event])
+events = EventBatch.validate_json(raw_json)
+```
+
+- Construct `TypeAdapter` once, outside hot loops
+- Validate raw JSON directly when JSON is the source
+- Pydantic handles validator compilation internally
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; font-size: 0.8em;"}
+
+**TypeScript (Zod 4.5)**
+
+```typescript
+// Compile a reused hot-path schema once
+const FastEventSchema = z.compile(EventSchema);
+const event = FastEventSchema.parse(input);
+```
+
+- Same parsing API, output, and error behavior
+- Most useful for repeatedly parsed compound schemas
+- Keep the uncompiled schema as the source of truth
+
+:::
+
+:::
+
+::::
+
+::: {style="background-color: #fff3e0; padding: 10px; border-radius: 10px; margin-top: 10px; text-align: center; font-size: 0.78em;"}
+`z.validate(schema, input)` is a boolean-only fast path: transforms and refinements affect the verdict, but parsed output and detailed errors are discarded. Use `.parse()` or `.safeParse()` when downstream code needs the validated output or actionable errors.
+:::
+
+::: {style="text-align: center; font-size: 0.55em; margin-top: 8px;"}
+Sources: [Pydantic performance](https://docs.pydantic.dev/latest/concepts/performance/) · [Zod 4.5](https://zod.dev/blog/zod-4-5)
+:::
+
 # Typing
 
 *Type inference that bridges static and runtime worlds*
@@ -1321,8 +1379,8 @@ CommentSubmissionSchema.parse({
 
 :::
 
-::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Schema limits bound downstream work; enforce request-size limits at the server or proxy too.
+::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center; font-size: 0.85em;"}
+Schema limits bound downstream work. Zod 4.5 counts Unicode code points—not bytes or user-perceived graphemes—so enforce request-size limits at the server or proxy too.
 :::
 
 # Full-Stack Validation
