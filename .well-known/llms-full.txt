@@ -7,4 +7,4 @@ Root llms.txt: https://www.indrapatil.com/parse-dont-pray/llms.txt
 Root llms-full.txt: https://www.indrapatil.com/parse-dont-pray/llms-full.txt
 Source: https://github.com/IndrajeetPatil/parse-dont-pray/
 
-Summary: Explore the benefits of Pydantic and Zod for runtime validation, type safety, focused contract testing, and safer input boundaries. The deck uses current Pydantic 2 and Zod 4 APIs and distinguishes validation from authorization and transport-level protections.
+Summary: Explore the benefits of Pydantic and Zod for runtime validation, type safety, focused contract testing, and safer input boundaries. The deck uses current Pydantic 2.13 and Zod 4.5 APIs and distinguishes validation from authorization and transport-level protections.
