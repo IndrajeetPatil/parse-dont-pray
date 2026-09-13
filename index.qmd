@@ -12,6 +12,7 @@ format:
     touch: true
     help: true
     include-in-header: meta-tags.html
+    include-after-body: accessibility.html
     link-external-newwindow: true
 execute:
   echo: true
@@ -29,7 +30,7 @@ image-alt: "Parse, Don't Pray - Two hands clasped together symbolizing the partn
 canonical-url: "https://www.indrapatil.com/parse-dont-pray/"
 ---
 
-## {.unnumbered .unlisted}
+## <span class="visually-hidden">Parse, Don't Pray: The Case for Data Validation</span> {#section .unnumbered .unlisted}
 
 ::: {style="text-align: center;"}
 
@@ -47,8 +48,8 @@ Indrajeet Patil
 
 :::
 
-::: {.footer style="text-align: center; font-size: 0.55em; color: #999; position: absolute; bottom: 20px; left: 0; right: 0;"}
-Source code: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/IndrajeetPatil/parse-dont-pray/)
+::: {.footer style="text-align: center; font-size: 0.55em; color: #666; position: absolute; bottom: 20px; left: 0; right: 0;"}
+Source code: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/IndrajeetPatil/parse-dont-pray/){style="text-decoration: underline;"}
 :::
 
 ## What You'll Learn {.smaller}
@@ -1500,7 +1501,7 @@ And Happy Parsing! 😊
 
 ::: {style="text-align: center; font-size: 0.7em;"}
 
-Check out my other [slide decks](https://www.indrapatil.com/presentations/) on software development best practices
+Check out my other [slide decks](https://www.indrapatil.com/presentations/){style="text-decoration: underline;"} on software development best practices
 
 :::
 
