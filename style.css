@@ -160,3 +160,13 @@
 .reveal .slides div.sourceCode pre code.has-line-highlights > span.highlight-line {
   background-color: #fff8e1;
 }
+
+/* Keep diagram relationships above 3:1 contrast against the white canvas. */
+.reveal .slides svg .flowchart-link {
+  stroke: #666 !important;
+}
+
+.reveal .slides svg .arrowMarkerPath {
+  fill: #666 !important;
+  stroke: #666 !important;
+}
