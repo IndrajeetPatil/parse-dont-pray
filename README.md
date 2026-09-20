@@ -1,5 +1,7 @@
 # Parse, Don't Pray: The Case for Data Validation
 
+[![Build and Deploy Presentation](https://github.com/IndrajeetPatil/parse-dont-pray/actions/workflows/build-presentation.yaml/badge.svg)](https://github.com/IndrajeetPatil/parse-dont-pray/actions/workflows/build-presentation.yaml)
+
 This presentation explores the benefits of using data validation libraries like Pydantic (Python) and Zod (TypeScript) to create robust, maintainable applications.
 
 The slides can be seen here:<br>
