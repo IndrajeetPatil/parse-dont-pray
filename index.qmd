@@ -38,7 +38,7 @@ date-meta: "2025-12-06"
 lang: "en"
 dir: "ltr"
 image: "media/social-media-card.webp"
-image-alt: "Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"
+image-alt: "Parse, Don't Pray - Two hands clasped together symbolising the partnership between Pydantic and Zod for data validation"
 canonical-url: "https://www.indrapatil.com/parse-dont-pray/"
 jupyter: python3
 ---
@@ -56,7 +56,7 @@ Indrajeet Patil
 :::
 
 ::: {style="display: flex; justify-content: center; margin-top: 0.2em;"}
-![](media/social-media-card.webp){width="85%" style="max-height: 400px; object-fit: contain;" fig-alt="Parse, Don't Pray - Two hands clasped together symbolizing the partnership between Pydantic and Zod for data validation"}
+![](media/social-media-card.webp){width="85%" style="max-height: 400px; object-fit: contain;" fig-alt="Parse, Don't Pray - Two hands clasped together symbolising the partnership between Pydantic and Zod for data validation"}
 :::
 
 :::
@@ -70,7 +70,7 @@ Source code: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/Indr
 - Why data validation libraries are essential for robust applications
 - Why validation is needed on **both** client and server (not just one)
 - How Pydantic (Python) and Zod (TypeScript) improve code quality
-- Benefits across readability, runtime behavior, typing, testing, and security
+- Benefits across readability, runtime behaviour, typing, testing, and security
 
 ::: {style="background-color: #FFFBC1; padding: 20px; border-radius: 25px; text-align: center;"}
 
@@ -202,7 +202,7 @@ Manual checks scattered throughout code:
 
 Schemas validate and parse inputs into typed outputs:
 
-- Centralized, self-documenting rules
+- Centralised, self-documenting rules
 - Explicit coercion where appropriate
 - Detailed error messages
 - Easier to maintain and evolve
@@ -316,7 +316,7 @@ The schema documents the executable contract; human-facing context still belongs
 :::
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center;"}
-Schema definition, validation logic, and type information stay synchronized in **one place**.
+Schema definition, validation logic, and type information stay synchronised in **one place**.
 :::
 
 ## Specific Types Over Generic {.smaller}
@@ -481,7 +481,7 @@ const UserSchema = z.object({
 
 :::
 
-# Runtime Behavior
+# Runtime Behaviour
 
 *Catch errors early before they propagate*
 
@@ -1136,7 +1136,7 @@ UserUpdateSchema.parse({
 :::
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Rejecting unknown fields blocks one mass-assignment path; authorization is still required.
+Rejecting unknown fields blocks one mass-assignment path; authorisation is still required.
 :::
 
 ## Type Confusion Prevention {.smaller}
@@ -1485,7 +1485,7 @@ Data validation libraries like Pydantic and Zod transform how we build applicati
 
 ::: {style="background-color: #e8f5e9; padding: 20px; border-radius: 10px; margin: 15px 0;"}
 
-**Readability**: Executable contracts that keep rules and types synchronized
+**Readability**: Executable contracts that keep rules and types synchronised
 
 **Runtime Safety**: Catch errors at system boundaries before they propagate
 
