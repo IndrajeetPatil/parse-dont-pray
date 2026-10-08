@@ -1434,6 +1434,10 @@ flowchart LR
 Pydantic and Zod 4 emit JSON Schema, reducing drift; still review descriptions and examples, and use Zod 4.6+ for accurate bounds.
 :::
 
+::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
+Source: [Zod 4.6 release notes](https://zod.dev/blog/zod-4-6){style="text-decoration: underline;"}
+:::
+
 ## Immutable Configs: Validate Once, Done {.smaller}
 
 ::: {.panel-tabset}
