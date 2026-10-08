@@ -455,7 +455,7 @@ const UserSchema = z.object({
 const acmeEmail = z.email()
   .refine(
     (email) => email.endsWith('@acme.com'),
-    { message: 'Must be @acme.com email' }
+    { error: 'Must be @acme.com email' }
   );
 
 const UserSchema = z.object({
@@ -547,7 +547,7 @@ import { z } from "zod";
 const ProductPriceSchema = z.object({
   productId: z.string(),
   price: z.number().positive(),
-  currency: z.string().regex(/^[A-Z]{3}$/),
+  currency: z.currencyCode(),
 });
 ```
 
@@ -1035,9 +1035,9 @@ const UserSchema = z.object({
 
 describe("User schema contract", () => {
   it("enforces the minimum age", () => {
-    expect(UserSchema.safeParse({
+    expect(UserSchema.validate({
       email: "a@test.com", age: 17,
-    }).success).toBe(false);
+    })).toBe(false);
   });
 });
 ```
@@ -1203,7 +1203,7 @@ import { z } from "zod";
 const PaymentRequestSchema = z.object({
   userId: z.string(),
   amount: z.number().positive(),
-  currency: z.string().regex(/^[A-Z]{3}$/),
+  currency: z.currencyCode(),
 });
 ```
 
@@ -1431,7 +1431,11 @@ flowchart LR
 ```
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Pydantic and Zod 4 emit JSON Schema, reducing drift; descriptions and examples still need review.
+Pydantic and Zod 4 emit JSON Schema, reducing drift; still review descriptions and examples, and use Zod 4.6+ for accurate bounds.
+:::
+
+::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
+Source: [Zod 4.6 release notes](https://zod.dev/blog/zod-4-6){style="text-decoration: underline;"}
 :::
 
 ## Immutable Configs: Validate Once, Done {.smaller}
