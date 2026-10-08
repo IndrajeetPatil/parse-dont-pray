@@ -927,7 +927,7 @@ def fetch_data_from_api() -> ApiResponse:
         "https://api.example.com/data"
     ).json()
     # Validates runtime data
-    return ApiResponse(**raw_response)
+    return ApiResponse.model_validate(raw_response)
 
 def process_response(response: ApiResponse) -> None:
     # Type-safe throughout
