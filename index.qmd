@@ -908,9 +908,10 @@ Schema is both validator and type definition!
 
 ```python
 from pydantic import *
+from typing import Literal
 
 class ApiResponse(BaseModel):
-    status: str = Field(pattern=r'^(success|error)$')
+    status: Literal["success", "error"]
     data: list[dict]
     message: str
 ```
