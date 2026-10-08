@@ -455,7 +455,7 @@ const UserSchema = z.object({
 const acmeEmail = z.email()
   .refine(
     (email) => email.endsWith('@acme.com'),
-    { message: 'Must be @acme.com email' }
+    { error: 'Must be @acme.com email' }
   );
 
 const UserSchema = z.object({
