@@ -296,9 +296,9 @@ TypeScript-first schema validation with type inference
 ::::
 
 ::: {.notes}
-Introduce the two industry-standard tools:
-- Pydantic v2: Written with a high-performance Rust core (pydantic-core), deeply integrated with Python's type hinting ecosystem, and powering modern frameworks like FastAPI.
-- Zod v4: A zero-dependency, functional TypeScript library that treats schemas as first-class values and infers static TypeScript types automatically.
+Introduce the two libraries featured in this presentation:
+- Pydantic (Python): Validates and manages data structures using Python's standard type hints.
+- Zod (TypeScript): Composable schema validation library designed for TypeScript that automatically infers static types from runtime schemas.
 :::
 
 # Benefits of Data Validation Libraries
@@ -1096,7 +1096,7 @@ External data is validated before entering your type-safe code!
 
 ::: {.notes}
 Explore end-to-end type safety across the stack:
-By sharing schemas or compiling them across client-server boundaries (e.g., using tRPC or FastAPI OpenAPI clients), a change in backend schema immediately triggers compile-time warnings on the frontend.
+When frontend and backend share schemas or use OpenAPI generators to produce client types, updating the contract allows type checkers to catch incompatibilities before runtime (with generated clients requiring a regeneration step to reflect backend schema updates).
 :::
 
 # Testing
@@ -1589,7 +1589,7 @@ Source: [Zod 4.6 release notes](https://zod.dev/blog/zod-4-6){style="text-decora
 
 ::: {.notes}
 Automatic documentation and API contract generation:
-Pydantic models seamlessly generate OpenAPI (Swagger) specifications in FastAPI, producing interactive documentation and client SDKs automatically from code.
+Schemas naturally translate into standard OpenAPI and JSON Schema specifications, enabling interactive documentation tools (such as Swagger UI) and providing input schemas for downstream client code generators.
 :::
 
 ## Immutable Configs: Validate Once, Done {.smaller}
