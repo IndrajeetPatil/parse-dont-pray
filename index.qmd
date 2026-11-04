@@ -189,10 +189,10 @@ Without compile-time checks, **runtime validation** ensures data integrity.
 :::
 
 ::: {.notes}
-Examine the limitations of static typing:
-TypeScript types and Python type hints are purely compile-time constructs. Through type erasure, they completely disappear once the application runs.
+Examine the boundaries of static type checking:
+In TypeScript, types are erased at compile time and do not exist at runtime. In Python, type annotations are preserved in `__annotations__` and inspected via `typing.get_type_hints`, but the runtime does not automatically enforce them.
 
-If an external API, database, or client sends unexpected JSON, static types cannot prevent runtime crashes. Runtime validation is required to bridge the gap between static assumptions and real-world inputs.
+When external JSON arrives from an API, database, or client request, static type checkers cannot protect against malformed payloads. Runtime validation libraries inspect data at the application boundary to guarantee integrity.
 :::
 
 ## What is Data Validation? {.smaller}
