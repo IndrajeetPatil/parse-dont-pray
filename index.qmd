@@ -65,6 +65,12 @@ Indrajeet Patil
 Source code: [github.com/IndrajeetPatil/parse-dont-pray](https://github.com/IndrajeetPatil/parse-dont-pray/){style="text-decoration: underline;"}
 :::
 
+::: {.notes}
+Welcome everyone. This presentation is inspired by Alexis King's influential functional programming essay, 'Parse, don't validate'.
+
+Today we explore how modern data validation libraries—specifically Pydantic in Python and Zod in TypeScript—enable developers to eliminate defensive programming, guarantee runtime type safety, and establish robust system boundaries.
+:::
+
 ## What You'll Learn {.smaller}
 
 - Why data validation libraries are essential for robust applications
@@ -90,9 +96,23 @@ Python examples use `from pydantic import *` for brevity; prefer explicit import
 
 :::
 
+::: {.notes}
+Outline the presentation agenda:
+- Introduction: Understanding the boundary gap where static types meet external runtime input.
+- Readability: Replacing brittle defensive checks with self-documenting declarative schemas.
+- Runtime Behaviour: Automatic validation, safe coercion, and precise, actionable error messages.
+- Typing & Testing: Dual-use schemas that provide static type inference and reduce testing overhead.
+- Security: Preventing mass assignment, type confusion, and Denial of Service through strict validation.
+- Full-Stack Synergy & Beyond: OpenAPI generation and failsafe configuration loading.
+:::
+
 # Introduction
 
 *Why data validation matters*
+
+::: {.notes}
+Introduce the foundational problem: What happens when software systems interact with the outside world?
+:::
 
 ## Dynamic vs Static Typing {.smaller}
 
@@ -168,6 +188,13 @@ Without compile-time checks, **runtime validation** ensures data integrity.
 
 :::
 
+::: {.notes}
+Examine the boundaries of static type checking:
+In TypeScript, types are erased at compile time and do not exist at runtime. In Python, type annotations are preserved in `__annotations__` and inspected via `typing.get_type_hints`, but the runtime does not automatically enforce them.
+
+When external JSON arrives from an API, database, or client request, static type checkers cannot protect against malformed payloads. Runtime validation libraries inspect data at the application boundary to guarantee integrity.
+:::
+
 ## What is Data Validation? {.smaller}
 
 Ensuring data meets specific criteria before use.
@@ -212,6 +239,11 @@ Schemas validate and parse inputs into typed outputs:
 :::
 
 ::::
+
+::: {.notes}
+Define data validation at system boundaries:
+Validation is not business logic (like checking whether an account has sufficient balance); it is ensuring that incoming data conforms to the expected structural shape, types, and baseline constraints before any processing occurs.
+:::
 
 ## Meet the Libraries {.smaller}
 
@@ -263,13 +295,27 @@ TypeScript-first schema validation with type inference
 
 ::::
 
+::: {.notes}
+Introduce the two libraries featured in this presentation:
+- Pydantic (Python): Validates and manages data structures using Python's standard type hints.
+- Zod (TypeScript): Composable schema validation library designed for TypeScript that automatically infers static types from runtime schemas.
+:::
+
 # Benefits of Data Validation Libraries
 
 *Creating robust, maintainable applications*
 
+::: {.notes}
+Transition into the practical benefits of schema-driven validation libraries in production codebases.
+:::
+
 # Readability
 
 *Self-documenting schemas that reduce cognitive load*
+
+::: {.notes}
+Introduce Section: Readability. How schema declarations dramatically clarify developer intent.
+:::
 
 ## Self-Documenting Schemas {.smaller}
 
@@ -317,6 +363,13 @@ The schema documents the executable contract; human-facing context still belongs
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 10px; text-align: center;"}
 Schema definition, validation logic, and type information stay synchronised in **one place**.
+:::
+
+::: {.notes}
+Contrast manual imperative checks with declarative schemas:
+Writing dozens of nested `if-else` blocks and checking dictionary keys manually obscures business logic.
+
+Declarative schemas like Pydantic's `BaseModel` or Zod's `z.object` serve as living, verified contracts that both humans and linters can read effortlessly.
 :::
 
 ## Specific Types Over Generic {.smaller}
@@ -481,9 +534,20 @@ const UserSchema = z.object({
 
 :::
 
+::: {.notes}
+Encourage specific types over generic primitives:
+Avoid primitive obsession. Instead of typing an identifier as a raw `str` or `int`, use constrained types like `EmailStr`, `PositiveInt`, or regex-bounded string patterns.
+
+This ensures invalid domain values cannot even be constructed.
+:::
+
 # Runtime Behaviour
 
 *Catch errors early before they propagate*
+
+::: {.notes}
+Introduce Section: Runtime Behaviour. How validation libraries handle data ingestion dynamically.
+:::
 
 ## Automatic Validation {.smaller}
 
@@ -583,6 +647,11 @@ ProductPriceSchema.parse({
 Data validated as it enters the system, catching errors early.
 :::
 
+::: {.notes}
+Explain automatic validation and fail-fast principles:
+When malformed data hits an endpoint, the library catches it immediately at the boundary and rejects it before it can corrupt state or cause downstream exceptions deep inside the stack.
+:::
+
 ## Data Coercion & Parsing {.smaller}
 
 ::: {.panel-tabset}
@@ -667,6 +736,13 @@ const event = EventSchema.parse({
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 Supports common conversions; make coercion explicit at untrusted boundaries.
+:::
+
+::: {.notes}
+Discuss parsing versus mere validation:
+Parsing transforms unstructured data into rich, structured types: converting date strings into `datetime` objects, strings into integers, or URLs into verified URI instances.
+
+The output is guaranteed to be clean, canonical data.
 :::
 
 ## Detailed Error Messages {.smaller}
@@ -770,9 +846,20 @@ if (!result.success) {
 Specific, actionable feedback about what's wrong and where.
 :::
 
+::: {.notes}
+Highlight the power of structured, detailed error reporting:
+Pydantic and Zod produce structured error lists pinpointing exact field paths (`loc`), violation types, and helpful diagnostic messages.
+
+This saves hours of API client debugging and allows frontends to map errors directly onto form fields.
+:::
+
 # Typing
 
 *Type inference that bridges static and runtime worlds*
+
+::: {.notes}
+Introduce Section: Typing. The seamless integration between runtime schemas and static type checkers.
+:::
 
 ## Type Inference {.smaller}
 
@@ -894,6 +981,13 @@ const city: string = getPersonCity(person);
 Schema is both validator and type definition!
 :::
 
+::: {.notes}
+Demonstrate type inference:
+With Zod, you define the schema once and extract the TypeScript type with `z.infer<typeof Schema>`. In Python, Pydantic models automatically inform IDE autocompletion and mypy/pyright.
+
+This eliminates the maintenance headache of keeping separate TypeScript interfaces and validation functions in sync.
+:::
+
 ## End-to-End Type Safety {.smaller}
 
 ::: {.panel-tabset}
@@ -1000,10 +1094,18 @@ function processResponse(response: ApiResponse): void {
 External data is validated before entering your type-safe code!
 :::
 
+::: {.notes}
+Explore end-to-end type safety across the stack:
+When frontend and backend share schemas or use OpenAPI generators to produce client types, updating the contract allows type checkers to catch incompatibilities before runtime (with generated clients requiring a regeneration step to reflect backend schema updates).
+:::
 
 # Testing
 
 *Verify your contract and integrations*
+
+::: {.notes}
+Introduce Section: Testing. How contract validation transforms testing strategies.
+:::
 
 ## Test the Contract You Own {.smaller}
 
@@ -1049,9 +1151,20 @@ describe("User schema contract", () => {
 Trust library mechanics; test boundary values, custom rules, and failure handling.
 :::
 
+::: {.notes}
+Focus testing on contracts you own:
+When your boundaries guarantee valid data, downstream internal functions no longer require dozens of defensive tests checking for `null`, `undefined`, or invalid types.
+
+You test the boundary parser thoroughly once, and write clean, confident business logic thereafter.
+:::
+
 # Security
 
 *Constrain untrusted input before business logic*
+
+::: {.notes}
+Introduce Section: Security. Data validation as the first line of application defence.
+:::
 
 ## Reject Unexpected Fields {.smaller}
 
@@ -1138,6 +1251,13 @@ UserUpdateSchema.parse({
 
 ::: {style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 Rejecting unknown fields blocks one mass-assignment path; authorisation is still required.
+:::
+
+::: {.notes}
+Explain mass-assignment vulnerabilities:
+If an API accepts unexpected fields, an attacker might submit `isAdmin: true` or overwrite sensitive tenant identifiers.
+
+By configuring schemas to forbid extra fields (`extra='forbid'` in Pydantic, `.strict()` in Zod), unexpected keys are rejected automatically.
 :::
 
 ## Type Confusion Prevention {.smaller}
@@ -1240,6 +1360,13 @@ PaymentRequestSchema.parse({
 Use strict schemas at trust boundaries; coerce only when intentional.
 :::
 
+::: {.notes}
+Preventing type confusion and injection attacks:
+Type confusion occurs when code expects a string but receives an array or object, bypassing naive checks.
+
+Validation guarantees that values are strictly the expected types before touching database queries or system commands.
+:::
+
 ## Size & Range Limits {.smaller}
 
 ::: {.panel-tabset}
@@ -1340,9 +1467,20 @@ CommentSubmissionSchema.parse({
 Schema limits bound downstream work; enforce request-size limits at the server or proxy too.
 :::
 
+::: {.notes}
+Mitigating Denial-of-Service (DoS) via range and size bounds:
+Always define string length limits, numeric boundaries, and array size caps.
+
+Unbounded inputs allow attackers to trigger memory exhaustion, regex catastrophic backtracking, or database timeouts.
+:::
+
 # Full-Stack Validation
 
 *Client + Server validation for UX and security*
+
+::: {.notes}
+Introduce Section: Full-Stack Validation. Coordinating validation between frontend and backend.
+:::
 
 ## Why Both Sides Matter {.smaller}
 
@@ -1403,9 +1541,19 @@ Server validation is **mandatory** for security, but without client validation, 
 
 ::::
 
+::: {.notes}
+Why client-side and server-side validation must work together:
+- Client-side validation: Optimises user experience by providing immediate inline feedback without a network round-trip.
+- Server-side validation: Essential for security, as attackers can bypass browser clients with curl or Postman. Never trust client-supplied data.
+:::
+
 # Additional Benefits
 
 *More advantages of using validation libraries*
+
+::: {.notes}
+Introduce additional enterprise architectural benefits of schema-driven design.
+:::
 
 ## API Design & Documentation {.smaller}
 
@@ -1437,6 +1585,11 @@ Pydantic and Zod 4 emit JSON Schema, reducing drift; still review descriptions a
 
 ::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
 Source: [Zod 4.6 release notes](https://zod.dev/blog/zod-4-6){style="text-decoration: underline;"}
+:::
+
+::: {.notes}
+Automatic documentation and API contract generation:
+Schemas naturally translate into standard OpenAPI and JSON Schema specifications, enabling interactive documentation tools (such as Swagger UI) and providing input schemas for downstream client code generators.
 :::
 
 ## Immutable Configs: Validate Once, Done {.smaller}
@@ -1478,9 +1631,20 @@ config.maxRetries = 5;  // 🚫 Compile error; runtime TypeError if attempted
 These freeze the top-level config; choose immutable nested types when deep immutability matters.
 :::
 
+::: {.notes}
+Failsafe configuration management:
+Use Pydantic's `BaseSettings` or Zod environment parsers to validate configuration variables at application launch.
+
+If a required secret, database URL, or port is missing or malformed, the service halts immediately on startup rather than crashing hours later in production.
+:::
+
 # Summary
 
 *Creating a validated type system that works at runtime*
+
+::: {.notes}
+Introduce the concluding summary and practical engineering principles.
+:::
 
 ## Key Takeaways {.smaller}
 
@@ -1510,6 +1674,14 @@ Data validation libraries like Pydantic and Zod transform how we build applicati
 
 :::
 
+::: {.notes}
+Recap the core takeaways:
+- Parse, don't pray: Validate data at system boundaries and guarantee type safety internally.
+- Use established libraries: Leverage Pydantic and Zod rather than hand-crafting brittle regex checks.
+- Enforce strict boundaries: Forbid unexpected fields, enforce range limits, and fail fast.
+- Enjoy the velocity: Cleaner code, automated docs, fewer defensive tests, and resilient production systems.
+:::
+
 # Thank You
 
 And Happy Parsing! 😊
@@ -1527,8 +1699,12 @@ Check out my other [slide decks](https://www.indrapatil.com/presentations/){styl
 
 <a class="deck-icon-link" href="https://www.linkedin.com/in/indrajeet-patil-ph-d-397865174/" aria-label="LinkedIn"><span class="deck-icon deck-icon-brands-linkedin" aria-hidden="true"></span></a>
 &nbsp;&nbsp;
-<a class="deck-icon-link" href="http://github.com/IndrajeetPatil" aria-label="GitHub"><span class="deck-icon deck-icon-brands-github" aria-hidden="true"></span></a>
+<a class="deck-icon-link" href="https://github.com/IndrajeetPatil" aria-label="GitHub"><span class="deck-icon deck-icon-brands-github" aria-hidden="true"></span></a>
 &nbsp;&nbsp;
 <a class="deck-icon-link" href="mailto:patilindrajeet.science@gmail.com" aria-label="Email"><span class="deck-icon deck-icon-solid-envelope" aria-hidden="true"></span></a>
 
+:::
+
+::: {.notes}
+Thank the audience for their time, provide GitHub and contact links, and invite questions on data validation patterns.
 :::
