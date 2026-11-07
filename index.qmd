@@ -1567,7 +1567,7 @@ Client validation is for **UX** (fast feedback), not security.
 **⚠️ Server-Only Validation**
 
 ```typescript
-async function submit(data: any) {
+async function submit(data: unknown) {
   await fetch("/api/users", {
     method: "POST",
     body: JSON.stringify(data),
