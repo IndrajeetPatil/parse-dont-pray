@@ -47,8 +47,17 @@ just axe       # Preview with the axe accessibility checker enabled
   restyle through `style.css`. Inline `style` backgrounds on fenced divs reuse
   colours already in `index.qmd`; do not invent new ones. New widgets follow the
   naming patterns already in `style.css`.
-- **Sources.** Every factual claim has a source citation at the bottom of its
-  slide in a small-font centred div. Keep this pattern.
+- **Sources.** Cite substantive technical claims at the bottom of the relevant
+  slide in a small-font centred div. Agenda slides such as "What You'll Learn"
+  do not need generic library citations. Consult current documentation and
+  release notes during research, but never add verification timestamps (such
+  as "Checked 7 November 2026"), release-audit footers (such as "Sources:
+  Pydantic releases · Python support · Zod releases"), or feature-introduction
+  version labels (such as "4.6+") to slides, spoken notes, or discovery summaries.
+- **Teaching focus.** Keep examples minimal and show the field or operation
+  being taught. Put library-specific caveats inside that library's tab, omit
+  comments that repeat slide headings, and fold minor caveats into relevant
+  footnotes or narration instead of adding a standalone slide.
 - **Spelling and punctuation.** Use British spelling in prose (colour, licence,
   catalogue, artefact) and the Oxford comma in lists of three or more. Leave
   code, identifiers, file names, URLs, quotations, and proper names (`license`

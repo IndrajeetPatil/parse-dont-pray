@@ -90,17 +90,13 @@ Create a **validated type system** that works at runtime, ensuring data actually
 Examples assume a **Python-TypeScript** full-stack, but the principles apply to other stacks.
 
 ::: {style="font-size: 0.7em; margin-top: 8px;"}
-Python: `pydantic[email]`; currency: `pydantic-extra-types` + `pycountry`; tests: pytest / Vitest.
+Python: [`pydantic[email]`](https://pypi.org/project/pydantic/); currency: [`pydantic-extra-types`](https://pypi.org/project/pydantic-extra-types/) + [`pycountry`](https://pypi.org/project/pycountry/); tests: [pytest](https://pypi.org/project/pytest/) / [Vitest](https://www.npmjs.com/package/vitest).
 :::
 
-:::
-
-::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
-Sources: [Pydantic](https://docs.pydantic.dev/latest/) · [Zod](https://zod.dev/)
 :::
 
 ::: {.notes}
-We will look at the gap between static types and runtime input, then at readability, parsing behaviour, errors, and type inference. We will also discuss testing, security boundaries, and sharing contracts across a system.
+We will look at the gap between static types and runtime input, then at readability, parsing behaviour, errors, and type inference. We will also discuss testing, security boundaries, and sharing contracts across a system. The package links below the goal lead to the dependencies used in the examples.
 :::
 
 # Introduction
@@ -295,16 +291,7 @@ TypeScript-first schema validation with type inference
 
 ::::
 
-::: {style="text-align: center; font-size: 0.7em; margin-top: 10px;"}
-Checked **7 November 2026**: Pydantic **2.14.3** (Python **3.10+**) · Zod **4.6.7**.
-:::
-
-::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
-Sources: [Pydantic releases](https://github.com/pydantic/pydantic/releases/tag/v2.14.3) · [Python support](https://pydantic.dev/articles/pydantic-v2-14-release) · [Zod releases](https://github.com/colinhacks/zod/releases/tag/v4.6.7)
-:::
-
 ::: {.notes}
-These examples were checked against Pydantic 2.14.3 and Zod 4.6.7 on 7 November 2026. Pydantic 2.14 supports Python 3.10 and later, including Python 3.15.
 Pydantic builds models around Python's type hints. Zod provides composable runtime schemas that can also inform TypeScript's static types. Both let a developer state an input contract explicitly instead of scattering checks throughout the program.
 :::
 
@@ -744,7 +731,7 @@ const event = EventSchema.parse({
 :::
 
 ::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Pydantic coerces by default; Zod requires opt-in. `z.coerce.boolean()` treats `"false"` as true; use `z.stringbool()` for flags.
+Pydantic coerces by default; Zod requires opt-in.
 :::
 
 ::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
@@ -752,53 +739,7 @@ Sources: [Pydantic conversions](https://docs.pydantic.dev/latest/concepts/conver
 :::
 
 ::: {.notes}
-Parsing can do more than answer yes or no. It can turn a date string into a date object or another external representation into the type the program expects. The accepted transformations must be deliberate, particularly when coercion would hide an input error.
-:::
-
-## Checks, Parsed Outputs, and Defaults {.smaller}
-
-::: {.panel-tabset}
-
-### Python (Pydantic)
-
-```python
-from pydantic import BaseModel, ConfigDict, Field
-
-class Retries(BaseModel):
-    model_config = ConfigDict(validate_default=True)
-    count: int = Field(default=3, ge=1, le=10)
-
-settings = Retries.model_validate({"count": "4"})
-assert settings.count == 4  # Use the validated model
-# Defaults are not validated unless opted in above.
-```
-
-### TypeScript (Zod)
-
-```typescript
-import { z } from "zod";
-
-const Flag = z.stringbool();
-Flag.validate("false");       // true: valid input, no parsed output
-Flag.parse("false");          // false: parsed boolean
-
-const Name = z.string().trim().min(1);
-Name.default(" Alice ").parse(undefined); // " Alice ": skips parsing
-Name.prefault(" Alice ").parse(undefined); // "Alice": parses fallback
-```
-
-:::
-
-::: {style="background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Use `.parse()` / `.safeParse()` when you need Zod's output; `.validate()` (4.6+) only answers whether the input is valid.
-:::
-
-::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
-Sources: [Pydantic defaults](https://docs.pydantic.dev/latest/concepts/fields/#validate-default-values) · [Zod defaults](https://zod.dev/api#defaults) · [Zod 4.6](https://zod.dev/blog/zod-4-6)
-:::
-
-::: {.notes}
-Keep the result of parsing. A validity check does not replace the original value with a coerced or transformed output. Defaults need care too: Pydantic does not validate defaults unless asked, and Zod's default returns its fallback directly. Zod's prefault instead sends the fallback through the parser.
+Parsing can do more than answer yes or no. It can turn a date string into a date object or another external representation into the type the program expects. The accepted transformations must be deliberate, particularly when coercion would hide an input error. Keep using the parsed model or object returned by the library; checking validity alone does not transform the original input.
 :::
 
 ## Detailed Error Messages {.smaller}
@@ -918,106 +859,32 @@ Runtime schemas and static typing can support each other. The aim is to avoid ma
 
 ### Python (Pydantic)
 
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
-
 ```python
 from pydantic import BaseModel
 
-class Address(BaseModel):
-    street: str
-    city: str
-
-class Person(BaseModel):
+class User(BaseModel):
     name: str
-    age: int
-    address: Address
-    phone: str | None = None
+
+user = User(name="Alice")
+name = user.name  # Inferred as str by type checkers
 ```
 
-:::
-
-::: {.column width="50%"}
-
-**Type Inference**
-
-```python
-def get_person_city(person: Person) -> str:
-    return person.address.city
-
-person = Person(
-    name="Alice",
-    age=30,
-    address=Address(street="123 Main St",
-                    city="Boston")
-)
-
-city: str = get_person_city(person)
-```
-
-:::
-
-::::
+The field annotation supplies the type; no separate type for `name` is needed.
 
 ### TypeScript (Zod)
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-**Schema Definition**
 
 ```typescript
 import { z } from "zod";
 
-const AddressSchema = z.object({
-  street: z.string(),
-  city: z.string(),
-});
+const UserSchema = z.object({ name: z.string() });
+type User = z.infer<typeof UserSchema>; // { name: string }
 
-const PersonSchema = z.object({
-  name: z.string(),
-  age: z.number(),
-  address: AddressSchema,
-  phone: z.string().nullable().default(null),
-});
+const user = UserSchema.parse({ name: "Alice" });
+const name = user.name;  // Inferred as string
 ```
 
-:::
-
-::: {.column width="50%"}
-
-**Type Inference**
-
-```typescript
-type Person = z.infer<typeof PersonSchema>;
-function getPersonCity(person: Person): string {
-  return person.address.city;
-}
-
-const person = PersonSchema.parse({
-  name: "Alice",
-  age: 30,
-  address: {
-    street: "123 Main St",
-    city: "Boston"
-  }
-});
-
-const city: string = getPersonCity(person);
-```
-
-:::
-
-::::
-
-:::
-
-::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
 `z.infer` describes parsed output; `z.input` describes accepted input.
+
 :::
 
 ::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
@@ -1025,7 +892,7 @@ Sources: [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/) ·
 :::
 
 ::: {.notes}
-Zod can infer a TypeScript type from a schema, while Pydantic models provide information used by Python development tools. A shared definition reduces the chance that a declared type and its runtime checks drift apart.
+One field is enough to see the relationship. In Python, the model declares name as a string, so a type checker knows that reading user.name produces a string. In TypeScript, Zod's infer utility derives the User type from the runtime schema, and the parsed object's name is also known to be a string. Zod distinguishes its input and output types when a parser transforms values; infer refers to the output. Neither example needs a second handwritten description of the user's fields.
 :::
 
 ## End-to-End Type Safety {.smaller}
@@ -1154,45 +1021,35 @@ A clear parsing boundary also changes how we organise tests. We can concentrate 
 
 ```python
 import pytest
-from pydantic import BaseModel, EmailStr, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
-class User(BaseModel):
-    email: EmailStr
-    age: int = Field(ge=18, le=120)
+class Signup(BaseModel):
+    age: int = Field(ge=18)
 
-def test_user_schema_contract():
-    assert User(email="a@test.com", age=18).age == 18
+def test_adult_signup_boundary():
+    Signup(age=18)  # Our policy accepts this age
     with pytest.raises(ValidationError):
-        User(email="a@test.com", age=17)
+        Signup(age=17)
 ```
 
 ### TypeScript (Zod)
 
 ```typescript
 import { z } from "zod";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 
-const UserSchema = z.object({
-  email: z.email(),
-  age: z.int().min(18).max(120),
-});
+const SignupSchema = z.object({ age: z.int().min(18) });
 
-describe("User schema contract", () => {
-  it("enforces the minimum age", () => {
-    expect(UserSchema.safeParse({
-      email: "a@test.com", age: 18,
-    }).success).toBe(true);
-    expect(UserSchema.safeParse({
-      email: "a@test.com", age: 17,
-    }).success).toBe(false);
-  });
+it("accepts adults and rejects underage signups", () => {
+  expect(SignupSchema.safeParse({ age: 18 }).success).toBe(true);
+  expect(SignupSchema.safeParse({ age: 17 }).success).toBe(false);
 });
 ```
 
 :::
 
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Trust library mechanics; test boundary values, custom rules, and failure handling.
+Test your chosen rules and error handling; avoid repeating the library's own type-validation tests.
 :::
 
 ::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
@@ -1200,7 +1057,7 @@ Sources: [Pydantic validation errors](https://docs.pydantic.dev/latest/errors/er
 :::
 
 ::: {.notes}
-Test the boundary with valid and invalid inputs, and test the business behaviour that follows. When internal code receives already-parsed values, it does not need to repeat every external-input check. This is a way to focus tests, rather than a reason to stop testing important assumptions.
+The rule we own here is that adult signups start at eighteen. Testing that eighteen is accepted and seventeen is rejected protects that policy against accidentally changing or removing the minimum. We do not need to assert that the model stores the age we supplied, or repeat the library's tests for every invalid integer representation. Add tests for custom rules and for how the application handles a rejected signup.
 :::
 
 # Security
@@ -1227,7 +1084,6 @@ Validation is also part of the security boundary. It makes accepted input explic
 from pydantic import BaseModel, ConfigDict
 
 class UserUpdate(BaseModel):
-    # Rejects unknown fields
     model_config = ConfigDict(extra='forbid')
     email: str
 ```
@@ -1265,7 +1121,7 @@ UserUpdate(
 ```{.typescript code-line-numbers="3"}
 import { z } from "zod";
 
-const UserUpdateSchema = z.strictObject({  // Rejects unknown fields
+const UserUpdateSchema = z.strictObject({
   email: z.email(),
 });
 ```
@@ -1651,37 +1507,90 @@ Schemas can support API documentation and standard descriptions such as OpenAPI 
 
 ### Python (Pydantic)
 
-```{.python code-line-numbers="4,9,10"}
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Mutable**
+
+```python
 from pydantic import BaseModel, ConfigDict, Field
 
-class AppConfig(BaseModel):
-    model_config = ConfigDict(frozen=True)  # Blocks field reassignment
-
-    api_key: str
+class MutableConfig(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
     max_retries: int = Field(ge=1, le=10)
 
-config = AppConfig(api_key="secret", max_retries=3)
-config.max_retries = 5  # 🚫 ValidationError: frozen instance
-```
-
-### TypeScript (Zod)
-
-```{.typescript code-line-numbers="5,8,9"}
-import { z } from "zod";
-
-const AppConfigSchema = z.object({
-  apiKey: z.string(),
-  maxRetries: z.int().min(1).max(10),
-}).readonly();
-
-const config = AppConfigSchema.parse({ apiKey: "secret", maxRetries: 3 });
-config.maxRetries = 5;  // 🚫 Compile error; runtime TypeError if attempted
+config = MutableConfig(max_retries=3)
+config.max_retries = 5  # Accepted
 ```
 
 :::
 
+::: {.column width="50%"}
+
+**Frozen**
+
+```python
+class FrozenConfig(MutableConfig):
+    model_config = ConfigDict(frozen=True)
+
+config = FrozenConfig(max_retries=3)
+config.max_retries = 5  # ValidationError
+```
+
+:::
+
+::::
+
+::: {style="font-size: 0.7em; margin-top: 8px;"}
+`validate_assignment=True` rechecks field reassignment on the mutable model.
+:::
+
+### TypeScript (Zod)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+**Mutable**
+
+```typescript
+import { z } from "zod";
+
+const MutableSchema = z.object({
+  maxRetries: z.int().min(1).max(10),
+});
+
+const mutable = MutableSchema.parse({ maxRetries: 3 });
+mutable.maxRetries = 5;  // Accepted
+```
+
+:::
+
+::: {.column width="50%"}
+
+**Frozen**
+
+```typescript
+const FrozenSchema = MutableSchema.readonly();
+
+const frozen = FrozenSchema.parse({ maxRetries: 3 });
+frozen.maxRetries = 5;  // TypeScript error
+// Runtime TypeError if attempted in strict mode
+```
+
+:::
+
+::::
+
+::: {style="font-size: 0.7em; margin-top: 8px;"}
+Zod validates when parsing; later mutations are not revalidated automatically.
+:::
+
+:::
+
 ::: {style="background-color: #e8f5e9; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;"}
-Freezing is shallow. Use immutable nested types; Pydantic also needs `validate_default=True` to check defaults and `validate_assignment=True` on mutable models.
+Freezing is shallow: choose immutable nested types when deep immutability matters.
 :::
 
 ::: {style="text-align: center; font-size: 0.55em; color: #666; margin-top: 10px;"}
@@ -1689,7 +1598,7 @@ Sources: [Pydantic faux immutability](https://docs.pydantic.dev/latest/concepts/
 :::
 
 ::: {.notes}
-Configuration is external input as well. Check required values, such as a database address or port, when the service starts. A clear startup failure is easier to understand than an exception hours later when the missing value is first used. Freezing only protects the top level, so choose immutable nested values too. Enable validation of defaults explicitly in Pydantic, and enable assignment validation if a model is meant to remain mutable; that still does not catch every in-place change to a nested collection.
+The two columns use the same field and constraints so that the difference is visible. The mutable Pydantic model accepts a change from three retries to five, and assignment validation checks the new value. Its frozen subclass rejects field reassignment. Zod's parsed object is mutable by default, and later mutations do not run its schema again. Adding readonly returns a frozen object and a readonly TypeScript type. Both forms of freezing protect the top level only; nested mutable collections need their own protection. Separately, Pydantic defaults require validate_default to be checked, and Zod's prefault parses a fallback where default returns it directly.
 :::
 
 # Summary
