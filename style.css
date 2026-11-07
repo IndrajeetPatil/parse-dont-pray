@@ -170,3 +170,9 @@
   fill: #666 !important;
   stroke: #666 !important;
 }
+
+/* Leave room for the schema-export caveat and sources below the diagram. */
+.reveal .schema-flow svg {
+  width: 100%;
+  height: 330px;
+}
