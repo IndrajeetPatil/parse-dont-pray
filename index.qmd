@@ -1355,8 +1355,8 @@ CommentSubmissionSchema.parse({
   rating: 999,                     // Out of range!
 });
 // Errors:
-// - content: max 5000 character(s)
-// - tags: max 10 element(s)
+// - content: max 5000 characters
+// - tags: max 10 items
 // - rating: max 5
 ```
 
